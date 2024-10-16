@@ -27,6 +27,10 @@ const LoginPage = () => {
             Đăng nhập
           </button>
         </form>
+        <div className="mt-4 flex justify-between text-sm">
+          <a href="#" className="text-teal-500 hover:text-teal-600">Quên mật khẩu?</a>
+          <a href="#" className="text-teal-500 hover:text-teal-600">Tạo tài khoản mới</a>
+        </div>
       </div>
     </div>
   );
