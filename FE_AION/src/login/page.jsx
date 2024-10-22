@@ -14,7 +14,6 @@ const LoginPage = ({ onLogin }) => {
   const handleSubmit = (event) => {
     event.preventDefault();
     let valid = true;
-
     if (!username) {
       setUsernameError('Vui lòng nhập username');
       valid = false;
