@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import Navbar from '../../components/Layout/DefaultLayout/Navbar'
 const HomePage = () => {
   const laptops = [
     { id: 1, name: 'MacBook Air 13 inch 2020', price: '23.990.000₫', image: 'https://media.studio7thailand.com/69968/MacBook_Pro_13-inch_Silver_1-square_medium.jpg', specs: ['M1', '8GB', '256GB', '13.3 inch'] },
@@ -83,29 +84,7 @@ const HomePage = () => {
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-100">
-      <header className="bg-green-900 text-white py-4">
-        <div className="container mx-auto px-4">
-          <div className="flex justify-between items-center">
-            <nav className="flex space-x-4">
-              <a href="#" className="hover:underline">Thiết bị</a>
-              <a href="#" className="hover:underline">Mac</a>
-              <a href="#" className="hover:underline">Laptop</a>
-              <a href="/new" className="hover:underline">Tin tức</a>
-            </nav>
-            <div className="flex items-center space-x-4">
-              <input
-                icon="fa-solid fa-magnifying-glass"
-                type="text"
-                placeholder="Tìm kiếm"
-                className="px-3 py-1 rounded-full text-black"
-                value={searchTerm}
-                onChange={handleSearch}
-              />
-              <Link to="/cart" icon="fa-solid fa-cart-shopping" className="hover:underline">Giỏ hàng ({cartItems.length})</Link>
-            </div>
-          </div>
-        </div>
-      </header>
+      <Navbar />
       <main className="flex-grow container mx-auto py-4 px-4">
         <div className="mb-4 text-center">
           <h2 className="text-2xl font-bold">Chuyển sang dùng Mac</h2>
