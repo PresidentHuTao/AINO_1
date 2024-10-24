@@ -1,6 +1,6 @@
-import HomePage from '../pages/home/page';
-import CartPage from '../pages/giohang/page';
-import AdminDashboard from '../pages/homeAdmin/page';
+import HomePage from '../pages/use/home/page';
+import CartPage from '../pages/use/giohang/page';
+import AdminDashboard from '../pages/admin/homeAdmin/page';
 
 // Public routes (có thể truy cập mà không cần đăng nhập)
 const publicRoutes = [

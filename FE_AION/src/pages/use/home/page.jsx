@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import Navbar from '../../components/Layout/DefaultLayout/Navbar'
+import Navbar from '../../../components/Layout/DefaultLayout/Navbar'
 const HomePage = () => {
   const laptops = [
-    { id: 1, name: 'MacBook Air 13 inch 2020', price: '23.990.000₫', image: 'https://media.studio7thailand.com/69968/MacBook_Pro_13-inch_Silver_1-square_medium.jpg', specs: ['M1', '8GB', '256GB', '13.3 inch'] },
+    { id: 1, name: 'MacBook Air 13 inch 2020', price: '23.990.000₫', image: 'https://i.postimg.cc/sgLc0HF8/notebook-xps-15-9530-t-black-gallery-1.avif', specs: ['M1', '8GB', '256GB', '13.3 inch'] },
     { id: 2, name: 'MacBook Pro 13 inch 2022', price: '32.990.000₫', image: 'https://media.studio7thailand.com/69968/MacBook_Pro_13-inch_Silver_1-square_medium.jpg', specs: ['M2', '8GB', '512GB', '13.3 inch'] },
     { id: 3, name: 'MacBook Pro 14 inch 2021', price: '52.990.000₫', image: 'https://media.studio7thailand.com/69968/MacBook_Pro_13-inch_Silver_1-square_medium.jpg', specs: ['M1 Pro', '16GB', '512GB', '14.2 inch'] },
     { id: 4, name: 'MacBook Pro 16 inch 2021', price: '62.990.000₫', image: 'https://media.studio7thailand.com/69968/MacBook_Pro_13-inch_Silver_1-square_medium.jpg', specs: ['M1 Max', '32GB', '1TB', '16.2 inch'] },
