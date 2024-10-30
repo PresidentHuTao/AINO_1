@@ -25,7 +25,7 @@ const HomePage = () => {
   }, []);
 
   const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const indexOfFirstItem = 0; // Always start from the first item
   const currentItems = laptops.slice(indexOfFirstItem, indexOfLastItem);
   const totalPages = Math.ceil(laptops.length / itemsPerPage);
 
