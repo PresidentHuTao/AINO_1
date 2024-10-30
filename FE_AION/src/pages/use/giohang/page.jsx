@@ -1,49 +1,122 @@
 import React, { useState, useEffect } from 'react';
 import Navbar from '../../../components/Layout/DefaultLayout/Navbar';
+import { Link, useNavigate } from 'react-router-dom';
 
 function CartPage() {
   const [cartItems, setCartItems] = useState([]);
   const [quantities, setQuantities] = useState({});
+  const [selectedItems, setSelectedItems] = useState({});
+  const [selectAll, setSelectAll] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const storedCartItems = JSON.parse(localStorage.getItem('cartItems')) || [];
-    setCartItems(storedCartItems);
-    
-    // Khởi tạo số lượng mặc định là 1 cho mỗi sản phẩm
+    const uniqueItems = [];
     const initialQuantities = {};
+    const initialSelectedItems = {};
+
     storedCartItems.forEach(item => {
-      initialQuantities[item.maDinhDanh] = 1;
+      if (!initialQuantities[item.maDinhDanh]) {
+        uniqueItems.push(item);
+        initialQuantities[item.maDinhDanh] = 1;
+        initialSelectedItems[item.maDinhDanh] = false;
+      } else {
+        initialQuantities[item.maDinhDanh] += 1;
+      }
     });
+
+    setCartItems(uniqueItems);
     setQuantities(initialQuantities);
+    setSelectedItems(initialSelectedItems);
   }, []);
 
   const handleRemoveFromCart = (maDinhDanh) => {
     const updatedCart = cartItems.filter(item => item.maDinhDanh !== maDinhDanh);
     setCartItems(updatedCart);
     localStorage.setItem('cartItems', JSON.stringify(updatedCart));
+    
+    const updatedQuantities = { ...quantities };
+    delete updatedQuantities[maDinhDanh];
+    setQuantities(updatedQuantities);
+
+    const updatedSelectedItems = { ...selectedItems };
+    delete updatedSelectedItems[maDinhDanh];
+    setSelectedItems(updatedSelectedItems);
   };
 
   const handleQuantityChange = (maDinhDanh, newQuantity) => {
-    if (newQuantity > 0) {
+    const item = cartItems.find(item => item.maDinhDanh === maDinhDanh);
+    if (newQuantity > 0 && newQuantity <= item.soLuong) {
       setQuantities(prev => ({
         ...prev,
         [maDinhDanh]: newQuantity
       }));
+    } else {
+      alert(`Số lượng sản phẩm không được vượt quá số lượng trong kho`);
     }
+  };
+
+  const handleSelectItem = (maDinhDanh) => {
+    setSelectedItems(prev => ({
+      ...prev,
+      [maDinhDanh]: !prev[maDinhDanh]
+    }));
+  };
+
+  const handleSelectAll = () => {
+    const newSelectAll = !selectAll;
+    setSelectAll(newSelectAll);
+    const updatedSelectedItems = {};
+    cartItems.forEach(item => {
+      updatedSelectedItems[item.maDinhDanh] = newSelectAll;
+    });
+    setSelectedItems(updatedSelectedItems);
   };
 
   const calculateTotal = () => {
     return cartItems.reduce((total, item) => {
-      const quantity = quantities[item.maDinhDanh] || 1;
-      return total + (parseFloat(item.donGia) * quantity);
+      if (selectedItems[item.maDinhDanh]) {
+        const quantity = quantities[item.maDinhDanh] || 1;
+        return total + (parseFloat(item.donGia) * quantity);
+      }
+      return total;
     }, 0);
   };
 
   const handleCheckout = () => {
-    // Xử lý thanh toán ở đây
-    console.log('Proceeding to checkout with items:', cartItems);
+    const itemsToCheckout = cartItems.filter(item => selectedItems[item.maDinhDanh]);
+    if (itemsToCheckout.length === 0) {
+      alert('Vui lòng chọn ít nhất một sản phẩm để thanh toán');
+      return;
+    }
+    
+    // Store selected items and their quantities for checkout
+    const checkoutData = itemsToCheckout.map(item => ({
+      ...item,
+      soLuong: quantities[item.maDinhDanh] || 1
+    }));
+    localStorage.setItem('checkoutItems', JSON.stringify(checkoutData));
+    navigate('/checkout');
   };
 
+  const handleRemoveSelectedItems = () => {
+    const itemsToKeep = cartItems.filter(item => !selectedItems[item.maDinhDanh]);
+    setCartItems(itemsToKeep);
+    localStorage.setItem('cartItems', JSON.stringify(itemsToKeep));
+
+    const updatedQuantities = { ...quantities };
+    const updatedSelectedItems = { ...selectedItems };
+
+    cartItems.forEach(item => {
+      if (selectedItems[item.maDinhDanh]) {
+        delete updatedQuantities[item.maDinhDanh];
+        delete updatedSelectedItems[item.maDinhDanh];
+      }
+    });
+
+    setQuantities(updatedQuantities);
+    setSelectedItems(updatedSelectedItems);
+  };
   return (
     <div className="min-h-screen bg-gray-100">
       <Navbar />
@@ -56,9 +129,24 @@ function CartPage() {
           </div>
         ) : (
           <div className="bg-white rounded-lg shadow-md p-6">
+            <div className="flex items-center mb-4">
+              <input 
+                type="checkbox" 
+                checked={selectAll} 
+                onChange={handleSelectAll} 
+                className="mr-2"
+              />
+              <span>Chọn tất cả ({cartItems.length})</span>
+            </div>
             <div className="space-y-4">
               {cartItems.map((item) => (
                 <div key={item.maDinhDanh} className="flex items-center border-b pb-4">
+                  <input 
+                    type="checkbox" 
+                    checked={selectedItems[item.maDinhDanh] || false} 
+                    onChange={() => handleSelectItem(item.maDinhDanh)} 
+                    className="mr-4"
+                  />
                   <img 
                     src={item.sanPham.hinhAnh} 
                     alt={item.sanPham.tenSanPham} 
@@ -109,19 +197,16 @@ function CartPage() {
               
               <div className="mt-6 flex justify-end space-x-4">
                 <button 
-                  onClick={() => {
-                    setCartItems([]);
-                    localStorage.removeItem('cartItems');
-                  }}
+                  onClick={handleRemoveSelectedItems}
                   className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50"
                 >
-                  Xóa tất cả
+                  Xóa các mục đã chọn
                 </button>
                 <button
                   onClick={handleCheckout}
                   className="px-6 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
                 >
-                  Thanh toán
+                 Xác nhận
                 </button>
               </div>
             </div>
