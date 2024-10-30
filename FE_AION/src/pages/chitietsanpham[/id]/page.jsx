@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import Navbar from '../../../components/Layout/DefaultLayout/Navbar';
 import { addToCart } from '../../../utils/cartUtils'; 
 
 const ChiTietSanPham = () => {
     const { maDinhDanh } = useParams(); // Lấy id sản phẩm từ URL
     const [product, setProduct] = useState(null);
+    const [laptops, setLaptops] = useState([]);
+    const [relatedProducts, setRelatedProducts] = useState([]); // State for related products
+    const navigate = useNavigate(); // Hook to navigate programmatically
 
     useEffect(() => {
         const fetchProductDetails = async () => {
@@ -24,12 +27,35 @@ const ChiTietSanPham = () => {
         fetchProductDetails();
     }, [maDinhDanh]); 
 
+    useEffect(() => {
+        const fetchLaptops = async () => {
+          try {
+            const response = await fetch('http://localhost:8080/rest/san_pham_chi_tiet/getAll'); // Fetch laptops from local server
+            if (!response.ok) {
+              throw new Error('Network response was not ok');
+            }
+            const data = await response.json();
+            setLaptops(data);
+            // Filter related products based on the product's id
+            const related = data.filter(item => item.sanPham.id === product?.sanPham.id);
+            setRelatedProducts(related);
+          } catch (error) {
+            console.error('Error fetching laptops:', error);
+          }
+        };
+        fetchLaptops();
+      }, [product]);
+
     if (!product) {
         return <div className="flex justify-center items-center h-screen">Loading...</div>;
     }
 
     const handleAddToCart = (item) => {
         addToCart(item); // Sử dụng hàm chung
+    };
+
+    const handleRelatedProductClick = (relatedProduct) => {
+        navigate(`/chitietsanpham/${relatedProduct.maDinhDanh}`); // Navigate to the related product's detail page
     };
 
     return (
@@ -57,6 +83,19 @@ const ChiTietSanPham = () => {
                         <li>Ổ lưu trữ: {product.oluuTru.dungLuong} GB, Loại: {product.oluuTru.loaiOCung}</li>
                     </ul>
                     <button onClick={(e) => { e.stopPropagation(); handleAddToCart(product); }} className="mt-2 px-4 py-2 bg-blue-500 text-white rounded-md">Thêm vào giỏ</button>
+                </div>
+            </div>
+            <div className="mt-6">
+                <h2 className="text-xl font-bold mb-4">Sản phẩm liên quan:</h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                    {relatedProducts.map((relatedProduct) => (
+                        <div key={relatedProduct.maDinhDanh} className="bg-white rounded-lg shadow-md p-4" onClick={() => handleRelatedProductClick(relatedProduct)}>
+                            <img src={relatedProduct.sanPham.hinhAnh} alt={relatedProduct.sanPham.tenSanPham} className="w-full h-32 object-cover mb-2" />
+                            <h3 className="font-semibold">{relatedProduct.sanPham.tenSanPham}</h3>
+                            <p className="text-red-600 font-bold">{relatedProduct.donGia} VNĐ</p>
+                            <button onClick={(e) => { e.stopPropagation(); handleAddToCart(relatedProduct); }} className="mt-2 px-4 py-2 bg-blue-500 text-white rounded-md">Thêm vào giỏ</button>
+                        </div>
+                    ))}
                 </div>
             </div>
         </div>
