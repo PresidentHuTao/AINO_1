@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '../../../components/Layout/DefaultLayout/Navbar';
-import { addToCart } from '../../../utils/cartUtils'; 
+import { addToCart } from '../../../utils/cartUtils'; // Import hàm
 
 const HomePage = () => {
   const [laptops, setLaptops] = useState([]);
@@ -25,7 +25,7 @@ const HomePage = () => {
   }, []);
 
   const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = 0; // Always start from the first item
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = laptops.slice(indexOfFirstItem, indexOfLastItem);
   const totalPages = Math.ceil(laptops.length / itemsPerPage);
 
@@ -55,7 +55,7 @@ const HomePage = () => {
       <main className="flex-grow container mx-auto py-4 px-4">
         <div className="mb-4 text-center">
           <h2 className="text-2xl font-bold">Chuyển sang dùng Mac</h2>
-          <p className="text-lg">Thịnh đẹp trai vô địch vũ trụ</p>
+          <p className="text-lg">Thịnh đẹp trai vô địch vũ trụ các cụ khen hay các cô mê mệt</p>
           <img src="https://cdnb.artstation.com/p/assets/images/images/016/802/459/large/shuja-shuaib-banner.jpg?1553535424" alt="MacBook Pro Banner" />
         </div>
         <div className="text-center mb-4">
@@ -164,7 +164,7 @@ const HomePage = () => {
             </div>
           </div>
           <div className="text-center mt-4">
-            <p>&copy; 2024 Shop thịnh ngựa.</p>
+            <p>&copy; 2024 Shop thịnh ngựa .</p>
           </div>
         </div>
       </footer>
