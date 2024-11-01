@@ -13,7 +13,7 @@ const ChiTietSanPham = () => {
     useEffect(() => {
         const fetchProductDetails = async () => {
             try {
-                const response = await fetch(`http://localhost:8080/rest/san_pham_chi_tiet/${maDinhDanh}`);
+                const response = await fetch(`http://localhost:8080/rest/san_pham_chi_tiet/getById/${maDinhDanh}`);
                 if (!response.ok) {
                     throw new Error('Network response was not ok');
                 }
@@ -55,7 +55,7 @@ const ChiTietSanPham = () => {
     };
 
     const handleRelatedProductClick = (relatedProduct) => {
-        navigate(`/chitietsanpham/${relatedProduct.maDinhDanh}`); // Navigate to the related product's detail page
+        navigate(`/chitietsanpham/${relatedProduct.id}`); // Navigate to the related product's detail page
     };
 
     return (
@@ -89,7 +89,7 @@ const ChiTietSanPham = () => {
                 <h2 className="text-xl font-bold mb-4">Sản phẩm liên quan:</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                     {relatedProducts.map((relatedProduct) => (
-                        <div key={relatedProduct.maDinhDanh} className="bg-white rounded-lg shadow-md p-4" onClick={() => handleRelatedProductClick(relatedProduct)}>
+                        <div key={relatedProduct.id} className="bg-white rounded-lg shadow-md p-4" onClick={() => handleRelatedProductClick(relatedProduct)}>
                             <img src={relatedProduct.sanPham.hinhAnh} alt={relatedProduct.sanPham.tenSanPham} className="w-full h-32 object-cover mb-2" />
                             <h3 className="font-semibold">{relatedProduct.sanPham.tenSanPham}</h3>
                             <p className="text-red-600 font-bold">{relatedProduct.donGia} VNĐ</p>
