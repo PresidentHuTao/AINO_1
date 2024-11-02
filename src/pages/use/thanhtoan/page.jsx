@@ -19,6 +19,11 @@ function CheckoutPage() {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [email, setEmail] = useState('');
   const [errors, setErrors] = useState({});
+  const [deliveryMethod, setDeliveryMethod] = useState('pickup'); // New state for delivery method
+  const [stores, setStores] = useState([]); // New state for stores
+  const [selectedStore, setSelectedStore] = useState(''); // New state for selected store
+  const [pickupDate, setPickupDate] = useState(''); // New state for pickup date
+  const [paymentMethod, setPaymentMethod] = useState('cod'); // New state for payment method
 
   useEffect(() => {
     const checkoutItems = JSON.parse(localStorage.getItem('checkoutItems')) || [];
@@ -37,11 +42,17 @@ function CheckoutPage() {
 
   useEffect(() => {
     callAPI(`${host}?depth=1`);
+    // Fake store data with address and working hours
+    setStores([
+      { id: '1', name: 'Cửa hàng A', address: '123 Đường A, Quận 1', hours: '8:00 - 17:00' },
+      { id: '2', name: 'Cửa hàng B', address: '456 Đường B, Quận 2', hours: '9:00 - 18:00' },
+      { id: '3', name: 'Cửa hàng C', address: '789 Đường C, Quận 3', hours: '10:00 - 19:00' },
+    ]);
   }, []);
 
   const callAPI = async (api) => {
     try {
-      const response = await fetch(api, { mode: 'cors' });
+      const response = await fetch(api);
       const data = await response.json();
       setProvinces(data);
     } catch (error) {
@@ -51,7 +62,7 @@ function CheckoutPage() {
 
   const callApiDistrict = async (provinceId) => {
     try {
-      const response = await fetch(`${host}p/${provinceId}?depth=2`, { mode: 'cors' });
+      const response = await fetch(`${host}p/${provinceId}?depth=2`);
       const data = await response.json();
       setDistricts(data.districts);
     } catch (error) {
@@ -61,7 +72,7 @@ function CheckoutPage() {
 
   const callApiWard = async (districtId) => {
     try {
-      const response = await fetch(`${host}d/${districtId}?depth=2`, { mode: 'cors' });
+      const response = await fetch(`${host}d/${districtId}?depth=2`);
       const data = await response.json();
       setWards(data.wards);
     } catch (error) {
@@ -108,29 +119,43 @@ function CheckoutPage() {
       newErrors.phone = "Số điện thoại phải có 10 số và bắt đầu bằng số 0";
     }
 
-    // Validate email
-    if (!email.trim()) {
-      newErrors.email = "Email không được để trống";
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    // Validate email (not mandatory)
+    if (email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       newErrors.email = "Email không hợp lệ";
     } else if (email.length > 100) {
       newErrors.email = "Email không được vượt quá 100 ký tự";
     }
 
     // Validate address
-    if (!selectedProvince) {
-      newErrors.province = "Vui lòng chọn tỉnh/thành phố";
+    if (deliveryMethod === 'pickup') {
+      if (!selectedStore) {
+        newErrors.store = "Vui lòng chọn cửa hàng";
+      }
+      if (!pickupDate) {
+        newErrors.pickupDate = "Vui lòng chọn thời gian tới lấy hàng";
+      } else {
+        const today = new Date();
+        const selectedDate = new Date(pickupDate);
+        if (selectedDate < today || selectedDate > new Date(today.setDate(today.getDate() + 7))) {
+          newErrors.pickupDate = "Ngày nhận hàng phải từ ngày mai đến 7 ngày sau";
+        }
+      }
     }
-    if (!selectedDistrict) {
-      newErrors.district = "Vui lòng chọn quận/huyện";
-    }
-    if (!selectedWard) {
-      newErrors.ward = "Vui lòng chọn phường/xã";
-    }
-    if (!specificAddress.trim()) {
-      newErrors.address = "Vui lòng nhập địa chỉ cụ thể";
-    } else if (specificAddress.length > 250) {
-      newErrors.address = "Địa chỉ không được vượt quá 250 ký tự";
+    if (deliveryMethod === 'shipping') {
+      if (!selectedProvince) {
+        newErrors.province = "Vui lòng chọn tỉnh/thành phố";
+      }
+      if (!selectedDistrict) {
+        newErrors.district = "Vui lòng chọn quận/huyện";
+      }
+      if (!selectedWard) {
+        newErrors.ward = "Vui lòng chọn phường/xã";
+      }
+      if (!specificAddress.trim()) {
+        newErrors.address = "Vui lòng nhập địa chỉ cụ thể";
+      } else if (specificAddress.length > 250) {
+        newErrors.address = "Địa chỉ không được vượt quá 250 ký tự";
+      }
     }
 
     // Validate cart
@@ -156,12 +181,13 @@ function CheckoutPage() {
             name: customerName.trim(),
             phone: phoneNumber,
             email: email.trim(),
-            address: {
+            address: deliveryMethod === 'pickup' ? { store: selectedStore, pickupDate } : {
               province: provinceName,
               district: districtName,
               ward: wardName,
               specificAddress: specificAddress.trim()
-            }
+            },
+            paymentMethod: paymentMethod // Include payment method in order data
           },
           items: cartItems.map(item => ({
             productId: item.maDinhDanh,
@@ -172,8 +198,14 @@ function CheckoutPage() {
         };
 
         console.log('Order data:', orderData);
-        // Here you would typically make an API call to your backend
-        // await createOrder(orderData);
+        
+       // ví momo
+        if (paymentMethod === 'momo') {
+          const paymentUrl = `https://momo.vn/pay?amount=${totalAmount}&shippingFee=0`; // Assuming shipping fee is 0
+          window.location.href = paymentUrl; // Redirect to Momo payment page
+        } else {
+        
+        }
       }
     } catch (error) {
       console.error('Checkout error:', error);
@@ -244,78 +276,171 @@ function CheckoutPage() {
                   className={`border rounded p-2 w-full ${errors.email ? 'border-red-500' : ''}`}
                   maxLength={100}
                 />
+                <p className="text-gray-500 text-sm mt-1">Nhập email để nhận hóa đơn online (*Không bắt buộc)</p>
                 {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
               </div>
 
               <div className="mb-4">
-                <label htmlFor="province" className="block text-lg font-semibold mb-2">Chọn tỉnh thành:</label>
+                <label htmlFor="deliveryMethod" className="block text-lg font-semibold mb-2">Phương thức nhận hàng:</label>
                 <select 
-                  id="province" 
-                  value={selectedProvince} 
-                  onChange={handleProvinceChange} 
-                  className={`border rounded p-2 w-full ${errors.province ? 'border-red-500' : ''}`}
-                >
-                  <option value="" disabled>Chọn tỉnh thành</option>
-                  {provinces.map(province => (
-                    <option key={province.code} value={province.code}>{province.name}</option>
-                  ))}
-                </select>
-                {errors.province && <p className="text-red-500 text-sm mt-1">{errors.province}</p>}
-              </div>
-
-              <div className="mb-4">
-                <label htmlFor="district" className="block text-lg font-semibold mb-2">Chọn quận huyện:</label>
-                <select 
-                  id="district" 
-                  value={selectedDistrict} 
-                  onChange={handleDistrictChange} 
-                  className={`border rounded p-2 w-full ${errors.district ? 'border-red-500' : ''}`} 
-                  disabled={!selectedProvince}
-                >
-                  <option value="" disabled>Chọn quận huyện</option>
-                  {districts.map(district => (
-                    <option key={district.code} value={district.code}>{district.name}</option>
-                  ))}
-                </select>
-                {errors.district && <p className="text-red-500 text-sm mt-1">{errors.district}</p>}
-              </div>
-
-              <div className="mb-4">
-                <label htmlFor="ward" className="block text-lg font-semibold mb-2">Chọn phường xã:</label>
-                <select 
-                  id="ward" 
-                  value={selectedWard} 
+                  id="deliveryMethod" 
+                  value={deliveryMethod} 
                   onChange={(e) => {
-                    setSelectedWard(e.target.value);
-                    setErrors(prev => ({...prev, ward: ''}));
+                    setDeliveryMethod(e.target.value);
+                    setErrors(prev => ({...prev, store: '', province: '', district: '', ward: '', address: '', pickupDate: ''}));
+                    if (e.target.value === 'pickup') {
+                      const today = new Date();
+                      const nextDay = new Date(today);
+                      nextDay.setDate(today.getDate() + 1);
+                      const maxDate = new Date(today);
+                      maxDate.setDate(today.getDate() + 7);
+                      setPickupDate(nextDay.toISOString().split('T')[0]); // Set default pickup date to tomorrow
+                    } else {
+                      setPickupDate('');
+                    }
                   }} 
-                  className={`border rounded p-2 w-full ${errors.ward ? 'border-red-500' : ''}`} 
-                  disabled={!selectedDistrict}
+                  className={`border rounded p-2 w-full`}
                 >
-                  <option value="" disabled>Chọn phường xã</option>
-                  {wards.map(ward => (
-                    <option key={ward.code} value={ward.code}>{ward.name}</option>
-                  ))}
+                  <option value="pickup">Nhận hàng tại quầy</option>
+                  <option value="shipping">Gửi đi</option>
                 </select>
-                {errors.ward && <p className="text-red-500 text-sm mt-1">{errors.ward}</p>}
               </div>
 
-              <div className="mb-4">
-                <label htmlFor="specificAddress" className="block text-lg font-semibold mb-2">Nhập địa chỉ số nhà cụ thể:</label>
-                <input
-                  type="text"
-                  id="specificAddress"
-                  value={specificAddress}
-                  onChange={(e) => {
-                    setSpecificAddress(e.target.value);
-                    setErrors(prev => ({...prev, address: ''}));
-                  }}
-                  className={`border rounded p-2 w-full ${errors.address ? 'border-red-500' : ''}`}
-                  maxLength={250}
-                />
-                {errors.address && <p className="text-red-500 text-sm mt-1">{errors.address}</p>}
-              </div>
+              {deliveryMethod === 'pickup' && (
+                <>
+                  <div className="mb-4">
+                    <label htmlFor="store" className="block text-lg font-semibold mb-2">Chọn cửa hàng:</label>
+                    <select 
+                      id="store" 
+                      value={selectedStore} 
+                      onChange={(e) => {
+                        setSelectedStore(e.target.value);
+                        setErrors(prev => ({...prev, store: ''}));
+                      }} 
+                      className={`border rounded p-2 w-full ${errors.store ? 'border-red-500' : ''}`}
+                    >
+                      <option value="" disabled>Chọn cửa hàng</option>
+                      {stores.map(store => (
+                        <option key={store.id} value={store.id}>
+                          {store.name} - {store.address} (Giờ mở cửa: {store.hours})
+                        </option>
+                      ))}
+                    </select>
+                    {errors.store && <p className="text-red-500 text-sm mt-1">{errors.store}</p>}
+                  </div>
+
+                  <div className="mb-4">
+                    <label htmlFor="pickupDate" className="block text-lg font-semibold mb-2">Chọn thời gian tới lấy hàng:</label>
+                    <input
+                      type="date"
+                      id="pickupDate"
+                      value={pickupDate}
+                      onChange={(e) => {
+                        setPickupDate(e.target.value);
+                        setErrors(prev => ({...prev, pickupDate: ''}));
+                      }}
+                      className={`border rounded p-2 w-full ${errors.pickupDate ? 'border-red-500' : ''}`}
+                      min={new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().split('T')[0]} // Minimum is tomorrow
+                      max={new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]} // Maximum is in a week
+                    />
+                    {errors.pickupDate && <p className="text-red-500 text-sm mt-1">{errors.pickupDate}</p>}
+                  </div>
+                </>
+              )}
+
+              {deliveryMethod === 'shipping' && (
+                <>
+                  <div className="mb-4">
+                    <label htmlFor="province" className="block text-lg font-semibold mb-2">Chọn tỉnh thành:</label>
+                    <select 
+                      id="province" 
+                      value={selectedProvince} 
+                      onChange={handleProvinceChange} 
+                      className={`border rounded p-2 w-full ${errors.province ? 'border-red-500' : ''}`}
+                    >
+                      <option value="" disabled>Chọn tỉnh thành</option>
+                      {provinces.map(province => (
+                        <option key={province.code} value={province.code}>{province.name}</option>
+                      ))}
+                    </select>
+                    {errors.province && <p className="text-red-500 text-sm mt-1">{errors.province}</p>}
+                  </div>
+
+                  <div className="mb-4">
+                    <label htmlFor="district" className="block text-lg font-semibold mb-2">Chọn quận huyện:</label>
+                    <select 
+                      id="district" 
+                      value={selectedDistrict} 
+                      onChange={handleDistrictChange} 
+                      className={`border rounded p-2 w-full ${errors.district ? 'border-red-500' : ''}`} 
+                      disabled={!selectedProvince}
+                    >
+                      <option value="" disabled>Chọn quận huyện</option>
+                      {districts.map(district => (
+                        <option key={district.code} value={district.code}>{district.name}</option>
+                      ))}
+                    </select>
+                    {errors.district && <p className="text-red-500 text-sm mt-1">{errors.district}</p>}
+                  </div>
+
+                  <div className="mb-4">
+                    <label htmlFor="ward" className="block text-lg font-semibold mb-2">Chọn phường xã:</label>
+                    <select 
+                      id="ward" 
+                      value={selectedWard} 
+                      onChange={(e) => {
+                        setSelectedWard(e.target.value);
+                        setErrors(prev => ({...prev, ward: ''}));
+                      }} 
+                      className={`border rounded p-2 w-full ${errors.ward ? 'border-red-500' : ''}`} 
+                      disabled={!selectedDistrict}
+                    >
+                      <option value="" disabled>Chọn phường xã</option>
+                      {wards.map(ward => (
+                        <option key={ward.code} value={ward.code}>{ward.name}</option>
+                      ))}
+                    </select>
+                    {errors.ward && <p className="text-red-500 text-sm mt-1">{errors.ward}</p>}
+                  </div>
+
+                  <div className="mb-4">
+                    <label htmlFor="specificAddress" className="block text-lg font-semibold mb-2">Nhập địa chỉ số nhà cụ thể:</label>
+                    <input
+                      type="text"
+                      id="specificAddress"
+                      value={specificAddress}
+                      onChange={(e) => {
+                        setSpecificAddress(e.target.value);
+                        setErrors(prev => ({...prev, address: ''}));
+                      }}
+                      className={`border rounded p-2 w-full ${errors.address ? 'border-red-500' : ''}`}
+                      maxLength={250}
+                    />
+                    {errors.address && <p className="text-red-500 text-sm mt-1">{errors.address}</p>}
+                  </div>
+                 
+                </>
+              )}
+               {/* Payment Method Section moved to the end */}
+               <div className="mb-4">
+                    <label htmlFor="paymentMethod" className="block text-lg font-semibold mb-2">Phương thức thanh toán:</label>
+                    <select 
+                      id="paymentMethod" 
+                      value={paymentMethod} 
+                      onChange={(e) => {
+                        setPaymentMethod(e.target.value);
+                        setErrors(prev => ({...prev, payment: ''})); // Clear payment errors on change
+                      }} 
+                      className={`border rounded p-2 w-full ${errors.payment ? 'border-red-500' : ''}`}
+                    >
+                      <option value="cod">Thanh toán khi nhận hàng</option>
+                      <option value="momo">Thanh toán qua Momo</option>
+                      <option value="vnpay">Thanh toán qua VNPay</option>
+                    </select>
+                    {errors.payment && <p className="text-red-500 text-sm mt-1">{errors.payment}</p>}
+                  </div>
             </div>
+            
           </div>
 
           {/* Right Column - Order Summary */}
@@ -385,6 +510,8 @@ function CheckoutPage() {
             </div>
           </div>
         </div>
+
+        
       </div>
     </div>
   );
