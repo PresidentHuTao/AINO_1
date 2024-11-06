@@ -3,7 +3,6 @@ package com.example.aino_1.serviceInter;
 import com.example.aino_1.dto.SanPhamChiTietDto;
 import com.example.aino_1.entity.SanPhamChiTiet;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 public interface SanPhamChiTietServiceInter {
@@ -13,8 +12,8 @@ public interface SanPhamChiTietServiceInter {
 
     SanPhamChiTiet update(SanPhamChiTiet spct);
 
-    void delete(String id);
-    SanPhamChiTiet detail(String id);
+    void delete(Integer id);
+    SanPhamChiTiet detail(Integer id);
     List<SanPhamChiTietDto> sreach(String tuKhoaTimKiem);
     List<SanPhamChiTietDto> locTheoGia(Double minPrice, Double maxPrice);
     List<SanPhamChiTietDto> locTheoDungLuongRam(Integer dungLuongRam);

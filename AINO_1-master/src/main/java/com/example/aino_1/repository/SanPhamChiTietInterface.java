@@ -7,11 +7,10 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 @Repository
-public interface SanPhamChiTietInterface extends JpaRepository<SanPhamChiTiet, String> {
+public interface SanPhamChiTietInterface extends JpaRepository<SanPhamChiTiet, Integer> {
     @Query("""
         SELECT new com.example.aino_1.dto.SanPhamChiTietDto(
         spct.id,
@@ -63,7 +62,6 @@ public interface SanPhamChiTietInterface extends JpaRepository<SanPhamChiTiet, S
         
 """)
     List<SanPhamChiTietDto> locTheoGia(@Param("minPrice") Double minPrice, @Param("maxPrice") Double maxPrice);
-
     @Query("""
         SELECT new com.example.aino_1.dto.SanPhamChiTietDto(
         spct.id,
@@ -86,7 +84,6 @@ public interface SanPhamChiTietInterface extends JpaRepository<SanPhamChiTiet, S
         
 """)
     List<SanPhamChiTietDto> locTheoDungLuongRam(@Param("dungLuongRam") Integer dungLuongRam);
-
     @Query("""
         SELECT new com.example.aino_1.dto.SanPhamChiTietDto(
         spct.id,
@@ -109,7 +106,6 @@ public interface SanPhamChiTietInterface extends JpaRepository<SanPhamChiTiet, S
         
 """)
     List<SanPhamChiTietDto> locTheoHangSanXuat(@Param("hangSanXuat") String hangSanXuat);
-
     @Query("""
         SELECT new com.example.aino_1.dto.SanPhamChiTietDto(
         spct.id,

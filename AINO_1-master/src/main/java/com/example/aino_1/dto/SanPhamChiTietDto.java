@@ -12,7 +12,7 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 public class SanPhamChiTietDto {
-    private String id;
+    private Integer id;
     private BigDecimal donGia;
     private String tenSanPham;
     private String hangSanXuat;

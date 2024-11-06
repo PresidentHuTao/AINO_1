@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 @CrossOrigin("*") //cho phép tất cả các miền khác truy cập tài nguyên server (end point api)
@@ -30,7 +29,7 @@ public class SanPhamChiTietRestController {
     }
 
     @GetMapping("/getById/{id}")
-    public SanPhamChiTiet getById(@PathVariable String id) {
+    public SanPhamChiTiet getById(@PathVariable Integer id) {
         return spctsi.detail(id);
     }
 
@@ -45,7 +44,7 @@ public class SanPhamChiTietRestController {
     }
 
     @DeleteMapping("/del/{id}")
-    public void delete(@PathVariable String id) {
+    public void delete(@PathVariable Integer id) {
         spctsi.delete(id);
     }
     @GetMapping("/tim_kiem/{tuKhoaTimKiem}")

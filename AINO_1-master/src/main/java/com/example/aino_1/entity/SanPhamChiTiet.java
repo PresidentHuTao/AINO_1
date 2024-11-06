@@ -25,13 +25,15 @@ public class SanPhamChiTiet {
     /còn ko thì hoặc là đặt thủ công hoặc gọi ra từ api*/
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
-    private String id;
+    private Integer id;
     @Column(name = "so_luong")
     private Integer soLuong;
     @Column(name = "trang_thai")
     private String trangThai;
     @Column(name = "don_gia", precision = 19, scale = 4)
     private BigDecimal donGia;
+    @Column(name = "ten_spct")
+    private String tenSpct;
     @ManyToOne
     @JoinColumn(name = "id_gio_hang")
     private GioHang gioHang;

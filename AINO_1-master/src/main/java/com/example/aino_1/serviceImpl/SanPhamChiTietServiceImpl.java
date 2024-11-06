@@ -7,7 +7,6 @@ import com.example.aino_1.serviceInter.SanPhamChiTietServiceInter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 //dựa trên cách quản lý bean của spring thì service phải đặt annotation ở tầng implements
@@ -32,12 +31,12 @@ public class SanPhamChiTietServiceImpl implements SanPhamChiTietServiceInter {
     }
 
     @Override
-    public void delete(String id) {
+    public void delete(Integer id) {
         spcti.deleteById(id);
     }
 
     @Override
-    public SanPhamChiTiet detail(String id) {
+    public SanPhamChiTiet detail(Integer id) {
         return spcti.findById(id).get();
     }
     @Override
@@ -60,7 +59,6 @@ public class SanPhamChiTietServiceImpl implements SanPhamChiTietServiceInter {
     public List<SanPhamChiTietDto> locTheoTamNen(String tamNen) {
         return spcti.locTheoTamNen(tamNen);
     }
-
     @Override
     public List<SanPhamChiTietDto> locTheoCongNgheCPU(String congNgheCPU) {
         return spcti.locTheoCongNgheCPU(congNgheCPU);

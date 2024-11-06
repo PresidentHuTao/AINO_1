@@ -40,7 +40,8 @@ public class SanPham {
     private BigDecimal trongLuong;
     /*lưu tên của file, file được lưu vào /resources/static/asset/image của server chứ ko lưu
     vào cookie, lưu ý tuyệt đối ko để tên file quá dài*/
-
+    @Column(name = "hinh_anh")
+    private String hinhAnh;
     @Column(name = "mau_sac")
     private String mauSac;
     @Column(name = "chat_lieu")
