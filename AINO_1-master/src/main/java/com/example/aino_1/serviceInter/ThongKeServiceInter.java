@@ -11,8 +11,6 @@ public interface ThongKeServiceInter {
     List<Object[]> getYearlyRevenue();
 
     Integer soDonHangThanhToan();
-    Integer soKhachHangDangKy();
-    Double tongdoanhthu();
-
+//    Integer soKhachHangDangKy();
     Double tongDoanhThu();
 }

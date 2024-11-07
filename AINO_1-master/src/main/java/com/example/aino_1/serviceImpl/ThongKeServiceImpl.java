@@ -28,15 +28,10 @@ public class ThongKeServiceImpl implements ThongKeServiceInter {
         return tki.soDonHangThanhToan();
     }
 
-    @Override
-    public Integer soKhachHangDangKy(){
-        return tki.soKhachHangDangKy();
-    }
-
-    @Override
-    public Double tongdoanhthu() {
-        return tki.tongdoanhthu();
-    }
+//    @Override
+//    public Integer soKhachHangDangKy(){
+//        return tki.soKhachHangDangKy();
+//    }
 
     @Override
     public Double tongDoanhThu(){

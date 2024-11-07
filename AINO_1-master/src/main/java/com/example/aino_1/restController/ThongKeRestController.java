@@ -30,10 +30,10 @@ public class ThongKeRestController {
         return tksi.soDonHangThanhToan();
     }
 
-    @GetMapping("/daThanhToan")
-    public Integer soKhachHangDangKy() {
-        return tksi.soKhachHangDangKy();
-    }
+//    @GetMapping("/daThanhToan")
+//    public Integer soKhachHangDangKy() {
+//        return tksi.soKhachHangDangKy();
+//    }
     @GetMapping("/tongDoanhThu")
     public Double tongDoanhThu(){
         return tksi.tongDoanhThu();

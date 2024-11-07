@@ -38,10 +38,13 @@ public interface ThongKeInterface extends JpaRepository<DonHang, Integer> {
             """)
     Integer soDonHangThanhToan();
     //số khách hàng đăng ký tài khoản
-    @Query("""
-            SELECT COUNT(tknd.id) FROM TaiKhoanNguoiDung tknd WHERE tknd.chucVu = 'CUSTOMER'
-            """)
-    Integer soKhachHangDangKy();
+//    @Query("""
+//            select COUNT(tknd.id) from TaiKhoanNguoiDung tknd
+//            JOIN ChucVu cv
+//            on cv.maChucVu = tknd.chucVu.maChucVu
+//            where cv.vaiTro = 'CUSTOMER'
+//            """)
+//    Integer soKhachHangDangKy();
     //tổng doanh thu
     @Query("""
             SELECT SUM(dh.tongTien) FROM DonHang dh WHERE dh.trangThai = 'Đã thanh toán'
