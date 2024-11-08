@@ -15,7 +15,7 @@ public interface SanPhamChiTietInterface extends JpaRepository<SanPhamChiTiet, I
         SELECT new com.example.aino_1.dto.SanPhamChiTietDto(
         spct.id,
         spct.donGia,
-        spct.sanPham.tenSanPham,
+        spct.tenSpct,
         spct.sanPham.hangSanXuat,
         spct.sanPham.mauSac,
         spct.sanPham.gioiThieu,
@@ -29,14 +29,8 @@ public interface SanPhamChiTietInterface extends JpaRepository<SanPhamChiTiet, I
         spct.cpu.kienTrucCongNghe,
         spct.cpu.ten
         ) FROM SanPhamChiTiet spct
-       WHERE spct.sanPham.tenSanPham LIKE %:tuKhoaTimKiem% 
-                   OR spct.cpu.ten LIKE %:tuKhoaTimKiem% 
-                   OR spct.manHinh.tamNen LIKE %:tuKhoaTimKiem% 
-                   OR CAST(spct.ram.dungLuong AS string) LIKE %:tuKhoaTimKiem% 
-                   OR spct.manHinh.doPhanGiai LIKE %:tuKhoaTimKiem% 
-                   OR CAST(spct.manHinh.tanSoQuet AS string) LIKE %:tuKhoaTimKiem%
-                   OR CAST(spct.cpu.boNhoDem AS string) LIKE %:tuKhoaTimKiem% 
-                   OR spct.sanPham.gioiThieu LIKE %:tuKhoaTimKiem%
+       WHERE spct.tenSpct LIKE %:tuKhoaTimKiem% 
+                   
         
 """)
     List<SanPhamChiTietDto> timSanPhamTheoTuKhoa(@Param("tuKhoaTimKiem") String tuKhoaTimKiem);
@@ -44,7 +38,7 @@ public interface SanPhamChiTietInterface extends JpaRepository<SanPhamChiTiet, I
         SELECT new com.example.aino_1.dto.SanPhamChiTietDto(
         spct.id,
         spct.donGia,
-        spct.sanPham.tenSanPham,
+        spct.tenSpct,
         spct.sanPham.hangSanXuat,
         spct.sanPham.mauSac,
         spct.sanPham.gioiThieu,
@@ -66,7 +60,7 @@ public interface SanPhamChiTietInterface extends JpaRepository<SanPhamChiTiet, I
         SELECT new com.example.aino_1.dto.SanPhamChiTietDto(
         spct.id,
         spct.donGia,
-        spct.sanPham.tenSanPham,
+        spct.tenSpct,
         spct.sanPham.hangSanXuat,
         spct.sanPham.mauSac,
         spct.sanPham.gioiThieu,
@@ -88,7 +82,7 @@ public interface SanPhamChiTietInterface extends JpaRepository<SanPhamChiTiet, I
         SELECT new com.example.aino_1.dto.SanPhamChiTietDto(
         spct.id,
         spct.donGia,
-        spct.sanPham.tenSanPham,
+        spct.tenSpct,
         spct.sanPham.hangSanXuat,
         spct.sanPham.mauSac,
         spct.sanPham.gioiThieu,
@@ -110,7 +104,7 @@ public interface SanPhamChiTietInterface extends JpaRepository<SanPhamChiTiet, I
         SELECT new com.example.aino_1.dto.SanPhamChiTietDto(
         spct.id,
         spct.donGia,
-        spct.sanPham.tenSanPham,
+        spct.tenSpct,
         spct.sanPham.hangSanXuat,
         spct.sanPham.mauSac,
         spct.sanPham.gioiThieu,
@@ -132,7 +126,7 @@ public interface SanPhamChiTietInterface extends JpaRepository<SanPhamChiTiet, I
         SELECT new com.example.aino_1.dto.SanPhamChiTietDto(
         spct.id,
         spct.donGia,
-        spct.sanPham.tenSanPham,
+        spct.tenSpct,
         spct.sanPham.hangSanXuat,
         spct.sanPham.mauSac,
         spct.sanPham.gioiThieu,
@@ -154,7 +148,7 @@ public interface SanPhamChiTietInterface extends JpaRepository<SanPhamChiTiet, I
         SELECT new com.example.aino_1.dto.SanPhamChiTietDto(
         spct.id,
         spct.donGia,
-        spct.sanPham.tenSanPham,
+        spct.tenSpct,
         spct.sanPham.hangSanXuat,
         spct.sanPham.mauSac,
         spct.sanPham.gioiThieu,
