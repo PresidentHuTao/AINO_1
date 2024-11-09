@@ -187,9 +187,9 @@ const HomePage = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                 {currentItems.map((laptop) => (
                   <div key={laptop.maDinhDanh} className="bg-white rounded-lg shadow-md overflow-hidden cursor-pointer group" onClick={() => window.location.href = `/chitietsanpham/${laptop.id}`}>
-                    <img src={laptop.sanPham.hinhAnh} alt={laptop.sanPham.tenSanPham} className="w-full h-48 object-cover" />
+                    <img src={laptop.sanPham.hinhAnh} alt={laptop.tenSpct} className="w-full h-48 object-cover" />
                     <div className="p-3">
-                      <h3 className="text-sm font-semibold mb-1">{laptop.sanPham.tenSanPham}</h3>
+                      <h3 className="text-sm font-semibold mb-1">{laptop.tenSpct}</h3>
                       <p className="text-red-600 font-bold text-lg mt-1">{laptop.donGia}</p>
                       <div className="mt-2">
                         {laptop.specs && Array.isArray(laptop.specs) && laptop.specs.map((spec, index) => (

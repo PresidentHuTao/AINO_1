@@ -1,6 +1,18 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 const AdminDashboard = () => {
+  const [username, setUsername] = useState(""); // State để lưu tên tài khoản
+
+  useEffect(() => {
+    // Lấy tên tài khoản từ localStorage khi component được render
+    const storedUsername = localStorage.getItem("sub");
+    if (storedUsername) {
+      setUsername(storedUsername);  // Lưu tên tài khoản vào state
+    } else {
+      console.log("Không tìm thấy tên tài khoản trong localStorage");
+    }
+  }, []);
+
   return (
     <div className="min-h-screen flex">
       {/* Sidebar */}
@@ -42,7 +54,8 @@ const AdminDashboard = () => {
               alt="User Avatar"
               className="rounded-full mr-2"
             />
-            <span>John Doe</span>
+            {/* Hiển thị tên tài khoản đã lấy từ localStorage */}
+            <span>{username ? username : "Loading..."}</span>
           </div>
         </div>
 

@@ -67,7 +67,7 @@ const ChiTietSanPham = () => {
                     <img src={product.sanPham.hinhAnh} alt={product.sanPham.tenSanPham} className="w-full h-auto" />
                 </div>
                 <div className="md:w-1/2 p-4">
-                    <h1 className="text-2xl font-bold mb-2">{product.sanPham.tenSanPham}</h1>
+                    <h1 className="text-2xl font-bold mb-2">{product.tenSpct}</h1>
                     <p className="text-gray-700 mb-4">{product.sanPham.gioiThieu}</p>
                     <p className="text-lg font-semibold mb-2">Giá: {product.donGia} VNĐ</p>
                     <p className="mb-2">Số lượng: {product.soLuong}</p>
@@ -91,7 +91,7 @@ const ChiTietSanPham = () => {
                     {relatedProducts.map((relatedProduct) => (
                         <div key={relatedProduct.id} className="bg-white rounded-lg shadow-md p-4" onClick={() => handleRelatedProductClick(relatedProduct)}>
                             <img src={relatedProduct.sanPham.hinhAnh} alt={relatedProduct.sanPham.tenSanPham} className="w-full h-32 object-cover mb-2" />
-                            <h3 className="font-semibold">{relatedProduct.sanPham.tenSanPham}</h3>
+                            <h3 className="font-semibold">{relatedProduct.tenSpct}</h3>
                             <p className="text-red-600 font-bold">{relatedProduct.donGia} VNĐ</p>
                             <button onClick={(e) => { e.stopPropagation(); handleAddToCart(relatedProduct); }} className="mt-2 px-4 py-2 bg-blue-500 text-white rounded-md">Thêm vào giỏ</button>
                         </div>

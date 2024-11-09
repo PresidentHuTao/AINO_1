@@ -3,16 +3,10 @@ import { BrowserRouter as Router, Route, Routes, useNavigate } from 'react-route
 import './App.css';
 import { publicRoutes, privateRoutes } from './routers/index';
 import LoginPage from './pages/login/page'; // Đảm bảo đã import LoginPage
+import handleLogin from './utils/auth'
 
 function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // Quản lý trạng thái đăng nhập
   const navigate = useNavigate();
-
-  // Hàm xử lý đăng nhập
-  const handleLogin = () => {
-    setIsLoggedIn(true); // Đặt trạng thái đăng nhập thành true
-    navigate('/admin'); // Điều hướng đến trang admin sau khi đăng nhập thành công
-  };
 
   return (
     <div className="w-full h-screen">
@@ -29,14 +23,12 @@ function App() {
             })}
 
           {/* Private routes */}
-          {isLoggedIn &&
+          {
             privateRoutes.map((route, index) => {
               const Page = route.component;
               return <Route key={index} path={route.path} element={<Page />} />;
             })}
 
-          {/* Nếu người dùng chưa đăng nhập, điều hướng về trang login khi truy cập admin */}
-          {!isLoggedIn && <Route path="/admin" element={<LoginPage onLogin={handleLogin} />} />}
         </Routes>
       </div>
     </div>
