@@ -58,7 +58,7 @@ const HomePage = () => {
   const filteredLaptops = filterLaptops(laptops);
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = filteredLaptops.slice(0, indexOfLastItem);
+  const currentItems = filteredLaptops.slice(indexOfFirstItem, indexOfLastItem);
   const totalPages = Math.ceil(filteredLaptops.length / itemsPerPage);
 
   const handleLoadMore = () => {
@@ -86,9 +86,16 @@ const HomePage = () => {
     <div className="flex flex-col min-h-screen bg-gray-100">
       <Navbar />
       <main className="flex-grow container mx-auto py-4 px-4">
+        {/* Banner Section */}
+        <div className="mb-4 text-center">
+          <h2 className="text-2xl font-bold">Chuyển sang dùng Mac</h2>
+          <p className="text-lg">Thịnh đẹp trai vô địch vũ trụ các cụ khen hay các cô mê mệt</p>
+          <img src="https://cdnb.artstation.com/p/assets/images/images/016/802/459/large/shuja-shuaib-banner.jpg?1553535424" alt="MacBook Pro Banner" className="w-full" />
+        </div>
+
         <div className="flex flex-row gap-4">
           {/* Left Sidebar Filters */}
-          <div className="w-1/4">
+          <div className="w-full md:w-1/4">
             <div className="bg-white p-4 rounded-lg shadow">
               <h3 className="text-lg font-semibold mb-4">Bộ lọc tìm kiếm</h3>
               
@@ -171,18 +178,11 @@ const HomePage = () => {
           </div>
 
           {/* Main Content */}
-          <div className="w-3/4">
-            {/* Banner Section */}
-            <div className="mb-4 text-center">
-              <h2 className="text-2xl font-bold">Chuyển sang dùng Mac</h2>
-              <p className="text-lg">Thịnh đẹp trai vô địch vũ trụ các cụ khen hay các cô mê mệt</p>
-              <img src="https://cdnb.artstation.com/p/assets/images/images/016/802/459/large/shuja-shuaib-banner.jpg?1553535424" alt="MacBook Pro Banner" />
-            </div>
-
-            <div className="text-center mb-4">
+          <div className="w-full md:w-5/6">
+            <div className="text-center mb-5">
               <h3 className="text-xl font-semibold">MacBook</h3>
             </div>
-
+      
             {currentItems.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                 {currentItems.map((laptop) => (

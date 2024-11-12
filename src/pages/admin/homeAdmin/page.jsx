@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import NavbarAdmin from '../Navbar/NavbarAdmin'; // Import NavbarAdmin
 
 const AdminDashboard = () => {
   const [username, setUsername] = useState(""); // State để lưu tên tài khoản
@@ -15,35 +16,7 @@ const AdminDashboard = () => {
 
   return (
     <div className="min-h-screen flex">
-      {/* Sidebar */}
-      <aside className="w-64 bg-gray-800 text-white">
-        <div className="p-4">
-          <h1 className="text-2xl font-bold">Admin Panel</h1>
-        </div>
-        <nav className="mt-6">
-          <ul>
-            <li className="py-2 px-4 hover:bg-gray-700">
-              <span>Dashboard</span>
-            </li>
-            <li className="py-2 px-4 hover:bg-gray-700">
-              <span>Quản lý bán hàng</span>
-            </li>
-            <li className="py-2 px-4 hover:bg-gray-700">
-              <span>Quản lý sản phẩm</span>
-            </li>
-            <li className="py-2 px-4 hover:bg-gray-700">
-              <span>Quản lý khách hàng</span>
-            </li>
-            <li className="py-2 px-4 hover:bg-gray-700">
-              <span>Quản lý đơn hàng</span>
-            </li>
-            <li className="py-2 px-4 hover:bg-gray-700">
-              <span>Quản lý thuộc tính sản phẩm</span>
-            </li>
-          </ul>
-        </nav>
-      </aside>
-
+      <NavbarAdmin /> {/* Gọi NavbarAdmin ở đây */}
       {/* Main Content */}
       <main className="flex-1 bg-gray-100 p-6">
         <div className="flex justify-between items-center">
