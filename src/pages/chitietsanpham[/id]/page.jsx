@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import Navbar from '../../../components/Layout/DefaultLayout/Navbar';
 import { addToCart } from '../../../utils/cartUtils'; 
+import Navbar from '../../../components/Layout/DefaultLayout/Navbar'; 
+import Footer from '../../../components/Layout/DefaultLayout/Footer';
 
 const ChiTietSanPham = () => {
     const { maDinhDanh } = useParams(); // Lấy id sản phẩm từ URL
@@ -59,8 +60,10 @@ const ChiTietSanPham = () => {
     };
 
     return (
+        <div>
+              <Navbar /> 
         <div className="container mx-auto p-4">
-            <Navbar />
+          
             <div className="flex flex-col md:flex-row bg-white shadow-lg rounded-lg overflow-hidden">
               
                 <div className="md:w-1/2">
@@ -98,6 +101,8 @@ const ChiTietSanPham = () => {
                     ))}
                 </div>
             </div>
+        </div>
+        <Footer/>
         </div>
     );
 };
