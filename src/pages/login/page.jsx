@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import login from "../../utils/auth"; // Import hàm login
 import { useNavigate } from "react-router-dom"; // Dùng hook navigate từ react-router-dom để điều hướng
 
-const LoginPage = ({ onLogin }) => {
+const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -22,7 +22,7 @@ const LoginPage = ({ onLogin }) => {
   
     if (!username) {
       setUsernameError("Vui lòng nhập tên đăng nhập");
-      setUsername("nHẬP TÊN TÀI KHẢN VÀO CHO TAO")
+      setUsername("NHẬP TÊN TÀI KHẢN VÀO CHO TAO")
       valid = false;
     } else {
       setUsernameError("");
@@ -30,6 +30,7 @@ const LoginPage = ({ onLogin }) => {
   
     if (!password) {
       setPasswordError("Vui lòng nhập mật khẩu");
+      setPassword("Nhâp cả mật khẩu nữa")
       valid = false;
     } else {
       setPasswordError("");
@@ -37,7 +38,6 @@ const LoginPage = ({ onLogin }) => {
     if (valid) {
       try {
         const result = await login(username, password, navigate);
-  
         if (!result.success) {
           setPasswordError(result.message); // Hiển thị thông báo lỗi
         }

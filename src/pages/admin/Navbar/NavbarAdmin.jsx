@@ -15,7 +15,7 @@ const NavbarAdmin = () => {
   };
 
   const navItems = [
-    { path: '/admin', icon: FiHome, label: 'Sản phẩm' },
+    { path: '/admin', icon: FiHome, label: 'Thống kê' },
     { path: '/admin/products', icon: FiBox, label: 'Quản lý sản phẩm' },
     { path: '/admin/orders', icon: FiShoppingCart, label: 'Quản lý đơn hàng' },
     { path: '/admin/customers', icon: FiUsers, label: 'Quản lý khách hàng' },
@@ -51,7 +51,7 @@ const NavbarAdmin = () => {
         <div className="flex items-center p-3 border-t border-gray-700">
           <img
             className="h-10 w-10 rounded-full" // Decreased avatar size
-            src="https://via.placeholder.com/40"
+            src="https://baothainguyen.vn/file//oldimage/baothainguyen/UserFiles/image/hiv(41).jpg"
             alt="User avatar"
           />
           <span className="ml-2">{username}</span> {/* Decreased margin for better spacing */}
