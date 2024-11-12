@@ -58,15 +58,13 @@ const HomePage = () => {
   const filteredLaptops = filterLaptops(laptops);
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = filteredLaptops.slice(indexOfFirstItem, indexOfLastItem);
+  const currentItems = filteredLaptops.slice(0, indexOfLastItem); // Changed to show all items up to current page
   const totalPages = Math.ceil(filteredLaptops.length / itemsPerPage);
 
   const handleLoadMore = () => {
     if (currentPage < totalPages) {
-      setCurrentPage(currentPage + 1);
-      if (currentPage + 1 >= totalPages) {
-        setHasMore(false);
-      }
+      setCurrentPage(prevPage => prevPage + 1);
+      setHasMore(currentPage + 1 < totalPages);
     }
   };
 
@@ -76,6 +74,7 @@ const HomePage = () => {
       [filterName]: value
     }));
     setCurrentPage(1);
+    setHasMore(true); // Reset hasMore when filters change
   };
 
   const handleAddToCart = (item) => {
@@ -178,7 +177,7 @@ const HomePage = () => {
           </div>
 
           {/* Main Content */}
-          <div className="w-full md:w-5/6">
+          <div className="w-full md:w-4/5">
             <div className="text-center mb-5">
               <h3 className="text-xl font-semibold">MacBook</h3>
             </div>
@@ -213,7 +212,7 @@ const HomePage = () => {
               <div className="flex justify-center mt-4 space-x-2">
                 <button 
                   onClick={handleLoadMore} 
-                  disabled={loading || !hasMore} 
+                  disabled={loading} 
                   className={`px-4 py-2 rounded-md ${loading ? 'bg-gray-400' : 'bg-gray-300 hover:bg-gray-400'}`}
                 >
                   {loading ? 'Đang tải...' : 'Xem thêm'}
