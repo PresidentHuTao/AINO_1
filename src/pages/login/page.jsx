@@ -19,28 +19,30 @@ const LoginPage = ({ onLogin }) => {
   const handleSubmit = async (event) => {
     event.preventDefault();
     let valid = true;
-
-    // Kiểm tra tên đăng nhập và mật khẩu
+  
     if (!username) {
       setUsernameError("Vui lòng nhập tên đăng nhập");
+      setUsername("nHẬP TÊN TÀI KHẢN VÀO CHO TAO")
       valid = false;
     } else {
       setUsernameError("");
     }
+  
     if (!password) {
       setPasswordError("Vui lòng nhập mật khẩu");
       valid = false;
     } else {
       setPasswordError("");
     }
-
-    // Nếu hợp lệ thì gọi hàm login
     if (valid) {
       try {
-        await login(username, password, navigate);  // Chắc chắn gọi login với await để đợi kết quả
-        onLogin(); // Xử lý thêm sau khi đăng nhập thành công
+        const result = await login(username, password, navigate);
+  
+        if (!result.success) {
+          setPasswordError(result.message); // Hiển thị thông báo lỗi
+        }
       } catch (error) {
-        setPasswordError("Tên đăng nhập hoặc mật khẩu không hợp lệ");
+        setPasswordError("Đã xảy ra lỗi khi đăng nhập");
       }
     }
   };
