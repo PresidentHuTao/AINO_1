@@ -33,7 +33,11 @@ function CartPage() {
   const handleRemoveFromCart = (maDinhDanh) => {
     const updatedCart = cartItems.filter(item => item.maDinhDanh !== maDinhDanh);
     setCartItems(updatedCart);
-    localStorage.setItem('cartItems', JSON.stringify(updatedCart));
+    
+    // Update localStorage with filtered items
+    const currentCartItems = JSON.parse(localStorage.getItem('cartItems')) || [];
+    const updatedCartItems = currentCartItems.filter(item => item.maDinhDanh !== maDinhDanh);
+    localStorage.setItem('cartItems', JSON.stringify(updatedCartItems));
     
     const updatedQuantities = { ...quantities };
     delete updatedQuantities[maDinhDanh];
@@ -51,6 +55,16 @@ function CartPage() {
         ...prev,
         [maDinhDanh]: newQuantity
       }));
+      
+      // Update localStorage with new quantity
+      const currentCartItems = JSON.parse(localStorage.getItem('cartItems')) || [];
+      const updatedCartItems = currentCartItems.map(cartItem => {
+        if (cartItem.maDinhDanh === maDinhDanh) {
+          return { ...cartItem, soLuong: newQuantity };
+        }
+        return cartItem;
+      });
+      localStorage.setItem('cartItems', JSON.stringify(updatedCartItems));
     } else {
       alert(`Số lượng sản phẩm không được vượt quá số lượng trong kho`);
     }
@@ -90,7 +104,6 @@ function CartPage() {
       return;
     }
     
-    // Store selected items and their quantities for checkout
     const checkoutData = itemsToCheckout.map(item => ({
       ...item,
       soLuong: quantities[item.maDinhDanh] || 1
@@ -102,7 +115,11 @@ function CartPage() {
   const handleRemoveSelectedItems = () => {
     const itemsToKeep = cartItems.filter(item => !selectedItems[item.maDinhDanh]);
     setCartItems(itemsToKeep);
-    localStorage.setItem('cartItems', JSON.stringify(itemsToKeep));
+    
+    // Update localStorage with remaining items
+    const currentCartItems = JSON.parse(localStorage.getItem('cartItems')) || [];
+    const updatedCartItems = currentCartItems.filter(item => !selectedItems[item.maDinhDanh]);
+    localStorage.setItem('cartItems', JSON.stringify(updatedCartItems));
 
     const updatedQuantities = { ...quantities };
     const updatedSelectedItems = { ...selectedItems };
@@ -116,7 +133,9 @@ function CartPage() {
 
     setQuantities(updatedQuantities);
     setSelectedItems(updatedSelectedItems);
+    setSelectAll(false);
   };
+
   return (
     <div className="min-h-screen bg-gray-100">
       <Navbar />
@@ -126,6 +145,9 @@ function CartPage() {
         {cartItems.length === 0 ? (
           <div className="bg-white p-6 rounded-lg shadow-md text-center">
             <p className="text-gray-600">Giỏ hàng của bạn đang trống</p>
+            <Link to="/" className="text-blue-500 hover:text-blue-600 mt-4 inline-block">
+              Tiếp tục mua sắm
+            </Link>
           </div>
         ) : (
           <div className="bg-white rounded-lg shadow-md p-6">
@@ -154,25 +176,28 @@ function CartPage() {
                   />
                   <div className="flex-1 ml-4">
                     <h3 className="font-semibold">{item.sanPham.tenSanPham}</h3>
-                    <p className="text-red-600 font-bold">{item.donGia}</p>
+                    <p className="text-red-600 font-bold">
+                      {parseFloat(item.donGia).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}
+                    </p>
                   </div>
                   <div className="flex items-center space-x-2">
                     <button 
                       onClick={() => handleQuantityChange(item.maDinhDanh, (quantities[item.maDinhDanh] || 1) - 1)}
-                      className="px-2 py-1 border rounded"
+                      className="px-2 py-1 border rounded hover:bg-gray-100"
                     >
                       -
                     </button>
                     <input
                       type="number"
                       min="1"
+                      max={item.soLuong}
                       value={quantities[item.maDinhDanh] || 1}
                       onChange={(e) => handleQuantityChange(item.maDinhDanh, parseInt(e.target.value))}
                       className="w-16 text-center border rounded p-1"
                     />
                     <button 
                       onClick={() => handleQuantityChange(item.maDinhDanh, (quantities[item.maDinhDanh] || 1) + 1)}
-                      className="px-2 py-1 border rounded"
+                      className="px-2 py-1 border rounded hover:bg-gray-100"
                     >
                       +
                     </button>
@@ -206,7 +231,7 @@ function CartPage() {
                   onClick={handleCheckout}
                   className="px-6 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
                 >
-                 Xác nhận
+                  Xác nhận
                 </button>
               </div>
             </div>

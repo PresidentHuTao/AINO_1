@@ -1,5 +1,11 @@
 import React, { useState, useEffect } from "react";
 import Navbar from "../../../components/Layout/DefaultLayout/Navbar";
+import CustomerInformation from '../../../components/GioHangComponenst/CustomerInformation';
+import DeliveryMethod from '../../../components/GioHangComponenst/DeliveryMethod';
+import PickupInfo from '../../../components/GioHangComponenst/PickupInfo';
+import ShippingInfo from '../../../components/GioHangComponenst/ShippingInfo';
+import PaymentMethod from '../../../components/GioHangComponenst/PaymentMethod';
+import OrderSummary from '../../../components/GioHangComponenst/OrderSummary';
 
 const host = "https://provinces.open-api.vn/api/";
 
@@ -260,457 +266,73 @@ function CheckoutPage() {
                 Thông tin khách hàng
               </h2>
 
-              <div className="mb-4">
-                <label
-                  htmlFor="customerName"
-                  className="block text-lg font-semibold mb-2"
-                >
-                  Họ tên:
-                </label>
-                <input
-                  type="text"
-                  id="customerName"
-                  value={customerName}
-                  onChange={(e) => {
-                    setCustomerName(e.target.value);
-                    setErrors((prev) => ({ ...prev, name: "" }));
-                  }}
-                  className={`border rounded p-2 w-full ${
-                    errors.name ? "border-red-500" : ""
-                  }`}
-                  maxLength={100}
-                />
-                {errors.name && (
-                  <p className="text-red-500 text-sm mt-1">{errors.name}</p>
-                )}
-              </div>
+              <CustomerInformation
+                customerName={customerName}
+                setCustomerName={setCustomerName}
+                phoneNumber={phoneNumber}
+                setPhoneNumber={setPhoneNumber}
+                email={email}
+                setEmail={setEmail}
+                errors={errors}
+                setErrors={setErrors}
+              />
 
-              <div className="mb-4">
-                <label
-                  htmlFor="phoneNumber"
-                  className="block text-lg font-semibold mb-2"
-                >
-                  Số điện thoại:
-                </label>
-                <input
-                  type="tel"
-                  id="phoneNumber"
-                  value={phoneNumber}
-                  onChange={(e) => {
-                    const value = e.target.value.replace(/\D/g, "");
-                    setPhoneNumber(value);
-                    setErrors((prev) => ({ ...prev, phone: "" }));
-                  }}
-                  className={`border rounded p-2 w-full ${
-                    errors.phone ? "border-red-500" : ""
-                  }`}
-                  maxLength={10}
-                />
-                {errors.phone && (
-                  <p className="text-red-500 text-sm mt-1">{errors.phone}</p>
-                )}
-              </div>
-
-              <div className="mb-4">
-                <label
-                  htmlFor="email"
-                  className="block text-lg font-semibold mb-2"
-                >
-                  Email:
-                </label>
-                <input
-                  type="email"
-                  id="email"
-                  value={email}
-                  onChange={(e) => {
-                    setEmail(e.target.value);
-                    setErrors((prev) => ({ ...prev, email: "" }));
-                  }}
-                  className={`border rounded p-2 w-full ${
-                    errors.email ? "border-red-500" : ""
-                  }`}
-                  maxLength={100}
-                />
-                <p className="text-gray-500 text-sm mt-1">
-                  Nhập email để nhận hóa đơn online (*Không bắt buộc)
-                </p>
-                {errors.email && (
-                  <p className="text-red-500 text-sm mt-1">{errors.email}</p>
-                )}
-              </div>
-
-              <div className="mb-4">
-                <label
-                  htmlFor="deliveryMethod"
-                  className="block text-lg font-semibold mb-2"
-                >
-                  Phương thức nhận hàng:
-                </label>
-                <select
-                  id="deliveryMethod"
-                  value={deliveryMethod}
-                  onChange={(e) => {
-                    setDeliveryMethod(e.target.value);
-                    setErrors((prev) => ({
-                      ...prev,
-                      store: "",
-                      province: "",
-                      district: "",
-                      ward: "",
-                      address: "",
-                      pickupDate: "",
-                    }));
-                    if (e.target.value === "pickup") {
-                      const today = new Date();
-                      const nextDay = new Date(today);
-                      nextDay.setDate(today.getDate() + 1);
-                      const maxDate = new Date(today);
-                      maxDate.setDate(today.getDate() + 7);
-                      setPickupDate(nextDay.toISOString().split("T")[0]); // Set default pickup date to tomorrow
-                    } else {
-                      setPickupDate("");
-                    }
-                  }}
-                  className={`border rounded p-2 w-full`}
-                >
-                  <option value="pickup">Nhận hàng tại quầy</option>
-                  <option value="shipping">Gửi đi</option>
-                </select>
-              </div>
+              <DeliveryMethod
+                deliveryMethod={deliveryMethod}
+                setDeliveryMethod={setDeliveryMethod}
+                setErrors={setErrors}
+                setPickupDate={setPickupDate}
+              />
 
               {deliveryMethod === "pickup" && (
-                <>
-                  <div className="mb-4">
-                    <label
-                      htmlFor="store"
-                      className="block text-lg font-semibold mb-2"
-                    >
-                      Chọn cửa hàng:
-                    </label>
-                    <select
-                      id="store"
-                      value={selectedStore}
-                      onChange={(e) => {
-                        setSelectedStore(e.target.value);
-                        setErrors((prev) => ({ ...prev, store: "" }));
-                      }}
-                      className={`border rounded p-2 w-full ${
-                        errors.store ? "border-red-500" : ""
-                      }`}
-                    >
-                      <option value="" disabled>
-                        Chọn cửa hàng
-                      </option>
-                      {stores.map((store) => (
-                        <option key={store.id} value={store.id}>
-                          {store.name} - {store.address} (Giờ mở cửa:{" "}
-                          {store.hours})
-                        </option>
-                      ))}
-                    </select>
-                    {errors.store && (
-                      <p className="text-red-500 text-sm mt-1">
-                        {errors.store}
-                      </p>
-                    )}
-                  </div>
-
-                  <div className="mb-4">
-                    <label
-                      htmlFor="pickupDate"
-                      className="block text-lg font-semibold mb-2"
-                    >
-                      Chọn thời gian tới lấy hàng:
-                    </label>
-                    <input
-                      type="date"
-                      id="pickupDate"
-                      value={pickupDate}
-                      onChange={(e) => {
-                        setPickupDate(e.target.value);
-                        setErrors((prev) => ({ ...prev, pickupDate: "" }));
-                      }}
-                      className={`border rounded p-2 w-full ${
-                        errors.pickupDate ? "border-red-500" : ""
-                      }`}
-                      min={
-                        new Date(Date.now() + 24 * 60 * 60 * 1000)
-                          .toISOString()
-                          .split("T")[0]
-                      } // Minimum is tomorrow
-                      max={
-                        new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
-                          .toISOString()
-                          .split("T")[0]
-                      } // Maximum is in a week
-                    />
-                    {errors.pickupDate && (
-                      <p className="text-red-500 text-sm mt-1">
-                        {errors.pickupDate}
-                      </p>
-                    )}
-                  </div>
-                </>
+                <PickupInfo
+                  stores={stores}
+                  selectedStore={selectedStore}
+                  setSelectedStore={setSelectedStore}
+                  pickupDate={pickupDate}
+                  setPickupDate={setPickupDate}
+                  errors={errors}
+                  setErrors={setErrors}
+                />
               )}
 
               {deliveryMethod === "shipping" && (
-                <>
-                  <div className="mb-4">
-                    <label
-                      htmlFor="province"
-                      className="block text-lg font-semibold mb-2"
-                    >
-                      Chọn tỉnh thành:
-                    </label>
-                    <select
-                      id="province"
-                      value={selectedProvince}
-                      onChange={handleProvinceChange}
-                      className={`border rounded p-2 w-full ${
-                        errors.province ? "border-red-500" : ""
-                      }`}
-                    >
-                      <option value="" disabled>
-                        Chọn tỉnh thành
-                      </option>
-                      {provinces.map((province) => (
-                        <option key={province.code} value={province.code}>
-                          {province.name}
-                        </option>
-                      ))}
-                    </select>
-                    {errors.province && (
-                      <p className="text-red-500 text-sm mt-1">
-                        {errors.province}
-                      </p>
-                    )}
-                  </div>
-
-                  <div className="mb-4">
-                    <label
-                      htmlFor="district"
-                      className="block text-lg font-semibold mb-2"
-                    >
-                      Chọn quận huyện:
-                    </label>
-                    <select
-                      id="district"
-                      value={selectedDistrict}
-                      onChange={handleDistrictChange}
-                      className={`border rounded p-2 w-full ${
-                        errors.district ? "border-red-500" : ""
-                      }`}
-                      disabled={!selectedProvince}
-                    >
-                      <option value="" disabled>
-                        Chọn quận huyện
-                      </option>
-                      {districts.map((district) => (
-                        <option key={district.code} value={district.code}>
-                          {district.name}
-                        </option>
-                      ))}
-                    </select>
-                    {errors.district && (
-                      <p className="text-red-500 text-sm mt-1">
-                        {errors.district}
-                      </p>
-                    )}
-                  </div>
-
-                  <div className="mb-4">
-                    <label
-                      htmlFor="ward"
-                      className="block text-lg font-semibold mb-2"
-                    >
-                      Chọn phường xã:
-                    </label>
-                    <select
-                      id="ward"
-                      value={selectedWard}
-                      onChange={(e) => {
-                        setSelectedWard(e.target.value);
-                        setErrors((prev) => ({ ...prev, ward: "" }));
-                      }}
-                      className={`border rounded p-2 w-full ${
-                        errors.ward ? "border-red-500" : ""
-                      }`}
-                      disabled={!selectedDistrict}
-                    >
-                      <option value="" disabled>
-                        Chọn phường xã
-                      </option>
-                      {wards.map((ward) => (
-                        <option key={ward.code} value={ward.code}>
-                          {ward.name}
-                        </option>
-                      ))}
-                    </select>
-                    {errors.ward && (
-                      <p className="text-red-500 text-sm mt-1">{errors.ward}</p>
-                    )}
-                  </div>
-
-                  <div className="mb-4">
-                    <label
-                      htmlFor="specificAddress"
-                      className="block text-lg font-semibold mb-2"
-                    >
-                      Nhập địa chỉ số nhà cụ thể:
-                    </label>
-                    <input
-                      type="text"
-                      id="specificAddress"
-                      value={specificAddress}
-                      onChange={(e) => {
-                        setSpecificAddress(e.target.value);
-                        setErrors((prev) => ({ ...prev, address: "" }));
-                      }}
-                      className={`border rounded p-2 w-full ${
-                        errors.address ? "border-red-500" : ""
-                      }`}
-                      maxLength={250}
-                    />
-                    {errors.address && (
-                      <p className="text-red-500 text-sm mt-1">
-                        {errors.address}
-                      </p>
-                    )}
-                  </div>
-                </>
+                <ShippingInfo
+                  provinces={provinces}
+                  districts={districts}
+                  wards={wards}
+                  selectedProvince={selectedProvince}
+                  selectedDistrict={selectedDistrict}
+                  selectedWard={selectedWard}
+                  specificAddress={specificAddress}
+                  handleProvinceChange={handleProvinceChange}
+                  handleDistrictChange={handleDistrictChange}
+                  setSelectedWard={setSelectedWard}
+                  setSpecificAddress={setSpecificAddress}
+                  errors={errors}
+                  setErrors={setErrors}
+                />
               )}
-              {/* Payment Method Section moved to the end */}
-              <div className="mb-4">
-                <label
-                  htmlFor="paymentMethod"
-                  className="block text-lg font-semibold mb-2"
-                >
-                  Phương thức thanh toán:
-                </label>
-                <select
-                  id="paymentMethod"
-                  value={paymentMethod}
-                  onChange={(e) => {
-                    setPaymentMethod(e.target.value);
-                    setErrors((prev) => ({ ...prev, payment: "" })); // Clear payment errors on change
-                  }}
-                  className={`border rounded p-2 w-full ${
-                    errors.payment ? "border-red-500" : ""
-                  }`}
-                >
-                  <option value="cod">Thanh toán khi nhận hàng</option>
-                  <option value="momo">Thanh toán qua Momo</option>
-                  <option value="vnpay">Thanh toán qua VNPay</option>
-                </select>
-                {errors.payment && (
-                  <p className="text-red-500 text-sm mt-1">{errors.payment}</p>
-                )}
-              </div>
+
+              <PaymentMethod
+                paymentMethod={paymentMethod}
+                setPaymentMethod={setPaymentMethod}
+                errors={errors}
+                setErrors={setErrors}
+              />
             </div>
           </div>
 
           {/* Right Column - Order Summary */}
           <div className="w-full md:w-1/2 px-4">
-            <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-              <h2 className="text-xl font-semibold mb-4">Thông tin đơn hàng</h2>
-              {errors.cart && (
-                <p className="text-red-500 mb-4">{errors.cart}</p>
-              )}
-              <div className="space-y-4">
-                {cartItems.map((item) => (
-                  <div
-                    key={item.maDinhDanh}
-                    className="flex items-center border-b pb-4"
-                  >
-                    <div className="w-24 h-24 flex-shrink-0">
-                      <img
-                        src={item.sanPham.hinhAnh}
-                        alt={item.sanPham.tenSanPham}
-                        className="w-full h-full object-cover rounded"
-                      />
-                    </div>
-
-                    <div className="flex-1 ml-4">
-                      <h3 className="font-semibold text-lg">
-                        {item.sanPham.tenSanPham}
-                      </h3>
-                      <div className="mt-2 text-gray-600">
-                        <p>
-                          Đơn giá:{" "}
-                          <span className="text-red-600 font-semibold">
-                            {parseFloat(item.donGia).toLocaleString("vi-VN", {
-                              style: "currency",
-                              currency: "VND",
-                            })}
-                          </span>
-                        </p>
-                        <p>
-                          Số lượng:{" "}
-                          <span className="font-semibold">
-                            {quantities[item.maDinhDanh] || 1}
-                          </span>
-                        </p>
-                        <p>
-                          Thành tiền:{" "}
-                          <span className="text-red-600 font-semibold">
-                            {(
-                              (quantities[item.maDinhDanh] || 1) *
-                              parseFloat(item.donGia)
-                            ).toLocaleString("vi-VN", {
-                              style: "currency",
-                              currency: "VND",
-                            })}
-                          </span>
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <div className="mt-6">
-                <div className="flex justify-between items-center border-b pb-4">
-                  <span className="text-lg font-semibold">Tạm tính:</span>
-                  <span className="text-xl font-bold text-red-600">
-                    {totalAmount.toLocaleString("vi-VN", {
-                      style: "currency",
-                      currency: "VND",
-                    })}
-                  </span>
-                </div>
-
-                <div className="flex justify-between items-center border-b py-4">
-                  <span className="text-lg font-semibold">Phí vận chuyển:</span>
-                  <span className="text-xl font-bold text-gray-600">
-                    Miễn phí
-                  </span>
-                </div>
-
-                <div className="flex justify-between items-center pt-4">
-                  <span className="text-xl font-bold">Tổng cộng:</span>
-                  <span className="text-2xl font-bold text-red-600">
-                    {totalAmount.toLocaleString("vi-VN", {
-                      style: "currency",
-                      currency: "VND",
-                    })}
-                  </span>
-                </div>
-              </div>
-
-              <div className="mt-6">
-                {errors.submit && (
-                  <p className="text-red-500 mb-4">{errors.submit}</p>
-                )}
-                <button
-                  onClick={handleCheckout}
-                  disabled={loading}
-                  className={`w-full py-3 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors
-                    ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
-                >
-                  {loading ? "Đang xử lý..." : "Xác nhận đơn hàng"}
-                </button>
-              </div>
-            </div>
+            <OrderSummary
+              cartItems={cartItems}
+              quantities={quantities}
+              totalAmount={totalAmount}
+              errors={errors}
+              loading={loading}
+              handleCheckout={handleCheckout}
+            />
           </div>
         </div>
       </div>
