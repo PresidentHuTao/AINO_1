@@ -193,21 +193,10 @@ function CheckoutPage() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleCheckout = async () => {
+  const handleCheckout = async (shippingFee) => {
     setLoading(true);
     try {
       if (validateFields()) {
-        // Get province, district, ward names
-        const provinceName = provinces.find(
-          (p) => p.code === parseInt(selectedProvince)
-        )?.name;
-        const districtName = districts.find(
-          (d) => d.code === parseInt(selectedDistrict)
-        )?.name;
-        const wardName = wards.find(
-          (w) => w.code === parseInt(selectedWard)
-        )?.name;
-
         const orderData = {
           customerInfo: {
             name: customerName.trim(),
@@ -217,9 +206,15 @@ function CheckoutPage() {
               deliveryMethod === "pickup"
                 ? { store: selectedStore, pickupDate }
                 : {
-                    province: provinceName,
-                    district: districtName,
-                    ward: wardName,
+                    province: provinces.find(
+                      (p) => p.code === parseInt(selectedProvince)
+                    )?.name,
+                    district: districts.find(
+                      (d) => d.code === parseInt(selectedDistrict)
+                    )?.name,
+                    ward: wards.find(
+                      (w) => w.code === parseInt(selectedWard)
+                    )?.name,
                     specificAddress: specificAddress.trim(),
                   },
             paymentMethod: paymentMethod, // Include payment method in order data
@@ -229,14 +224,15 @@ function CheckoutPage() {
             quantity: quantities[item.maDinhDanh],
             price: parseFloat(item.donGia),
           })),
-          totalAmount: totalAmount,
+          shippingFee: shippingFee, 
+          totalAmount: totalAmount + shippingFee
         };
 
         console.log("Order data:", orderData);
 
         // ví momo
         if (paymentMethod === "momo") {
-          const paymentUrl = `https://momo.vn/pay?amount=${totalAmount}&shippingFee=0`; // Assuming shipping fee is 0
+          const paymentUrl = `https://momo.vn/pay?amount=${totalAmount + shippingFee}&shippingFee=0`; // Assuming shipping fee is 0
           window.location.href = paymentUrl; // Redirect to Momo payment page
         } else {
         }

@@ -102,6 +102,7 @@ function ShippingInfo({
           }}
           className={`border rounded p-2 w-full ${errors.address ? "border-red-500" : ""}`}
           maxLength={250}
+          placeholder="Nhập địa chỉ cụ thể"
         />
         {errors.address && (
           <p className="text-red-500 text-sm mt-1">{errors.address}</p>
@@ -111,4 +112,4 @@ function ShippingInfo({
   );
 }
 
-export default ShippingInfo; 
+export default ShippingInfo;
