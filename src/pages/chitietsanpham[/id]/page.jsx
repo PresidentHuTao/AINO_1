@@ -59,6 +59,15 @@ const ChiTietSanPham = () => {
         navigate(`/chitietsanpham/${relatedProduct.id}`); // Navigate to the related product's detail page
     };
 
+    const handleBuyNow = () => {
+        navigate(`/xacnhandonhang/${product.id}`); // Navigate to the order confirmation page with the product
+    };
+
+    // Function to format price with commas
+    const formatPrice = (price) => {
+        return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    };
+
     return (
         <div>
               <Navbar /> 
@@ -72,7 +81,7 @@ const ChiTietSanPham = () => {
                 <div className="md:w-1/2 p-4">
                     <h1 className="text-2xl font-bold mb-2">{product.tenSpct}</h1>
                     <p className="text-gray-700 mb-4">{product.sanPham.gioiThieu}</p>
-                    <p className="text-lg font-semibold mb-2">Giá: {product.donGia} VNĐ</p>
+                    <p className="text-lg font-semibold mb-2">Giá: {formatPrice(product.donGia)} VNĐ</p>
                     <p className="mb-2">Số lượng: {product.soLuong}</p>
                     <p className="mb-4">Trạng thái: {product.trangThai}</p>
                     <h2 className="text-lg font-semibold mb-2">Thông tin chi tiết:</h2>
@@ -85,7 +94,10 @@ const ChiTietSanPham = () => {
                         <li>Màn hình: {product.manHinh.kichThuoc} inch, Độ phân giải: {product.manHinh.doPhanGiai}</li>
                         <li>Ổ lưu trữ: {product.oluuTru.dungLuong} GB, Loại: {product.oluuTru.loaiOCung}</li>
                     </ul>
-                    <button onClick={(e) => { e.stopPropagation(); handleAddToCart(product); }} className="mt-2 px-4 py-2 bg-blue-500 text-white rounded-md">Thêm vào giỏ</button>
+                    <div className="flex justify-between mt-4">
+                        <button onClick={handleBuyNow} className="px-4 py-2 bg-green-500 text-white rounded-md">Mua ngay</button>
+                        <button onClick={(e) => { e.stopPropagation(); handleAddToCart(product); }} className="ml-2 px-4 py-2 bg-blue-500 text-white rounded-md">Thêm vào giỏ</button>
+                    </div>
                 </div>
             </div>
             <div className="mt-6">
@@ -95,7 +107,7 @@ const ChiTietSanPham = () => {
                         <div key={relatedProduct.id} className="bg-white rounded-lg shadow-md p-4" onClick={() => handleRelatedProductClick(relatedProduct)}>
                             <img src={relatedProduct.sanPham.hinhAnh} alt={relatedProduct.sanPham.tenSanPham} className="w-full h-32 object-cover mb-2" />
                             <h3 className="font-semibold">{relatedProduct.tenSpct}</h3>
-                            <p className="text-red-600 font-bold">{relatedProduct.donGia} VNĐ</p>
+                            <p className="text-red-600 font-bold">{formatPrice(relatedProduct.donGia)} VNĐ</p>
                             <button onClick={(e) => { e.stopPropagation(); handleAddToCart(relatedProduct); }} className="mt-2 px-4 py-2 bg-blue-500 text-white rounded-md">Thêm vào giỏ</button>
                         </div>
                     ))}

@@ -16,12 +16,12 @@ function CartPage() {
     const initialSelectedItems = {};
 
     storedCartItems.forEach(item => {
-      if (!initialQuantities[item.maDinhDanh]) {
+      if (!initialQuantities[item.id]) {
         uniqueItems.push(item);
-        initialQuantities[item.maDinhDanh] = 1;
-        initialSelectedItems[item.maDinhDanh] = false;
+        initialQuantities[item.id] = 1;
+        initialSelectedItems[item.id] = false;
       } else {
-        initialQuantities[item.maDinhDanh] += 1;
+        initialQuantities[item.id] += 1;
       }
     });
 
@@ -30,36 +30,36 @@ function CartPage() {
     setSelectedItems(initialSelectedItems);
   }, []);
 
-  const handleRemoveFromCart = (maDinhDanh) => {
-    const updatedCart = cartItems.filter(item => item.maDinhDanh !== maDinhDanh);
+  const handleRemoveFromCart = (id) => {
+    const updatedCart = cartItems.filter(item => item.id !== id);
     setCartItems(updatedCart);
     
     // Update localStorage with filtered items
     const currentCartItems = JSON.parse(localStorage.getItem('cartItems')) || [];
-    const updatedCartItems = currentCartItems.filter(item => item.maDinhDanh !== maDinhDanh);
+    const updatedCartItems = currentCartItems.filter(item => item.id !== id);
     localStorage.setItem('cartItems', JSON.stringify(updatedCartItems));
     
     const updatedQuantities = { ...quantities };
-    delete updatedQuantities[maDinhDanh];
+    delete updatedQuantities[id];
     setQuantities(updatedQuantities);
 
     const updatedSelectedItems = { ...selectedItems };
-    delete updatedSelectedItems[maDinhDanh];
+    delete updatedSelectedItems[id];
     setSelectedItems(updatedSelectedItems);
   };
 
-  const handleQuantityChange = (maDinhDanh, newQuantity) => {
-    const item = cartItems.find(item => item.maDinhDanh === maDinhDanh);
+  const handleQuantityChange = (id, newQuantity) => {
+    const item = cartItems.find(item => item.id === id);
     if (newQuantity > 0 && newQuantity <= item.soLuong) {
       setQuantities(prev => ({
         ...prev,
-        [maDinhDanh]: newQuantity
+        [id]: newQuantity
       }));
       
       // Update localStorage with new quantity
       const currentCartItems = JSON.parse(localStorage.getItem('cartItems')) || [];
       const updatedCartItems = currentCartItems.map(cartItem => {
-        if (cartItem.maDinhDanh === maDinhDanh) {
+        if (cartItem.id === id) {
           return { ...cartItem, soLuong: newQuantity };
         }
         return cartItem;
@@ -70,27 +70,28 @@ function CartPage() {
     }
   };
 
-  const handleSelectItem = (maDinhDanh) => {
+  const handleSelectItem = (id) => {
     setSelectedItems(prev => ({
       ...prev,
-      [maDinhDanh]: !prev[maDinhDanh]
+      [id]: !prev[id]
     }));
   };
 
+  // hàm chọn tất cả 
   const handleSelectAll = () => {
     const newSelectAll = !selectAll;
     setSelectAll(newSelectAll);
     const updatedSelectedItems = {};
     cartItems.forEach(item => {
-      updatedSelectedItems[item.maDinhDanh] = newSelectAll;
+      updatedSelectedItems[item.id] = newSelectAll;
     });
     setSelectedItems(updatedSelectedItems);
   };
 
   const calculateTotal = () => {
     return cartItems.reduce((total, item) => {
-      if (selectedItems[item.maDinhDanh]) {
-        const quantity = quantities[item.maDinhDanh] || 1;
+      if (selectedItems[item.id]) {
+        const quantity = quantities[item.id] || 1;
         return total + (parseFloat(item.donGia) * quantity);
       }
       return total;
@@ -98,7 +99,7 @@ function CartPage() {
   };
 
   const handleCheckout = () => {
-    const itemsToCheckout = cartItems.filter(item => selectedItems[item.maDinhDanh]);
+    const itemsToCheckout = cartItems.filter(item => selectedItems[item.id]);
     if (itemsToCheckout.length === 0) {
       alert('Vui lòng chọn ít nhất một sản phẩm để thanh toán');
       return;
@@ -106,28 +107,28 @@ function CartPage() {
     
     const checkoutData = itemsToCheckout.map(item => ({
       ...item,
-      soLuong: quantities[item.maDinhDanh] || 1
+      soLuong: quantities[item.id] || 1
     }));
     localStorage.setItem('checkoutItems', JSON.stringify(checkoutData));
     navigate('/checkout');
   };
 
   const handleRemoveSelectedItems = () => {
-    const itemsToKeep = cartItems.filter(item => !selectedItems[item.maDinhDanh]);
+    const itemsToKeep = cartItems.filter(item => !selectedItems[item.id]);
     setCartItems(itemsToKeep);
     
     // Update localStorage with remaining items
     const currentCartItems = JSON.parse(localStorage.getItem('cartItems')) || [];
-    const updatedCartItems = currentCartItems.filter(item => !selectedItems[item.maDinhDanh]);
+    const updatedCartItems = currentCartItems.filter(item => !selectedItems[item.id]);
     localStorage.setItem('cartItems', JSON.stringify(updatedCartItems));
 
     const updatedQuantities = { ...quantities };
     const updatedSelectedItems = { ...selectedItems };
 
     cartItems.forEach(item => {
-      if (selectedItems[item.maDinhDanh]) {
-        delete updatedQuantities[item.maDinhDanh];
-        delete updatedSelectedItems[item.maDinhDanh];
+      if (selectedItems[item.id]) {
+        delete updatedQuantities[item.id];
+        delete updatedSelectedItems[item.id];
       }
     });
 
@@ -162,11 +163,11 @@ function CartPage() {
             </div>
             <div className="space-y-4">
               {cartItems.map((item) => (
-                <div key={item.maDinhDanh} className="flex items-center border-b pb-4">
+                <div key={item.id} className="flex items-center border-b pb-4">
                   <input 
                     type="checkbox" 
-                    checked={selectedItems[item.maDinhDanh] || false} 
-                    onChange={() => handleSelectItem(item.maDinhDanh)} 
+                    checked={selectedItems[item.id] || false} 
+                    onChange={() => handleSelectItem(item.id)} 
                     className="mr-4"
                   />
                   <img 
@@ -182,7 +183,7 @@ function CartPage() {
                   </div>
                   <div className="flex items-center space-x-2">
                     <button 
-                      onClick={() => handleQuantityChange(item.maDinhDanh, (quantities[item.maDinhDanh] || 1) - 1)}
+                      onClick={() => handleQuantityChange(item.id, (quantities[item.id] || 1) - 1)}
                       className="px-2 py-1 border rounded hover:bg-gray-100"
                     >
                       -
@@ -191,19 +192,19 @@ function CartPage() {
                       type="number"
                       min="1"
                       max={item.soLuong}
-                      value={quantities[item.maDinhDanh] || 1}
-                      onChange={(e) => handleQuantityChange(item.maDinhDanh, parseInt(e.target.value))}
+                      value={quantities[item.id] || 1}
+                      onChange={(e) => handleQuantityChange(item.id, parseInt(e.target.value))}
                       className="w-16 text-center border rounded p-1"
                     />
                     <button 
-                      onClick={() => handleQuantityChange(item.maDinhDanh, (quantities[item.maDinhDanh] || 1) + 1)}
+                      onClick={() => handleQuantityChange(item.id, (quantities[item.id] || 1) + 1)}
                       className="px-2 py-1 border rounded hover:bg-gray-100"
                     >
                       +
                     </button>
                   </div>
                   <button
-                    onClick={() => handleRemoveFromCart(item.maDinhDanh)}
+                    onClick={() => handleRemoveFromCart(item.id)}
                     className="ml-4 text-red-500 hover:text-red-700"
                   >
                     Xóa
