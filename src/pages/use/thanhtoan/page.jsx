@@ -54,19 +54,25 @@ function CheckoutPage() {
       {
         id: "1",
         name: "Cửa hàng A",
-        address: "123 Đường A, Quận 1",
+        pick_province: "Hà Nội",
+        pick_district: "Quận Hoàn Kiếm",
+        pick_street: "phố nhổn",
         hours: "8:00 - 17:00",
       },
       {
         id: "2",
         name: "Cửa hàng B",
-        address: "456 Đường B, Quận 2",
+        pick_province: "Hà Nội",
+        pick_district: "Quận Hoàn Kiếm",
+        pick_street: "phố nhổn",
         hours: "9:00 - 18:00",
       },
       {
         id: "3",
         name: "Cửa hàng C",
-        address: "789 Đường C, Quận 3",
+        pick_province: "Hà Nội",
+        pick_district: "Quận Hoàn Kiếm",
+        pick_street: "phố nhổn",
         hours: "10:00 - 19:00",
       },
     ]);
@@ -259,6 +265,7 @@ function CheckoutPage() {
         <h1 className="text-2xl font-bold mb-6">Thanh toán</h1>
 
         <div className="flex flex-wrap -mx-4">
+          
           {/* Left Column - Customer Information */}
           <div className="w-full md:w-1/2 px-4">
             <div className="bg-white rounded-lg shadow-md p-6 mb-6">
