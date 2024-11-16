@@ -13,7 +13,7 @@ const publicRoutes = [
   { path: '/', component: HomePage },
   { path: '/home', component: HomePage },
   { path: '/cart', component: CartPage },
-  { path: '/chitietsanpham/:maDinhDanh', component: ChiTietSanPham },
+  { path: '/chitietsanpham/:idSanPham', component: ChiTietSanPham },
   { path: '/checkout', component: CheckoutPage },
 ];
 

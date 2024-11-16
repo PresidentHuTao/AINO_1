@@ -171,12 +171,12 @@ function CartPage() {
                     className="mr-4"
                   />
                   <img 
-                    src={item.sanPham.hinhAnh} 
-                    alt={item.sanPham.tenSanPham} 
+                    src={item.hinhAnh} 
+                    alt={item.tenSanPham} 
                     className="w-24 h-24 object-cover rounded"
                   />
                   <div className="flex-1 ml-4">
-                    <h3 className="font-semibold">{item.sanPham.tenSanPham}</h3>
+                    <h3 className="font-semibold">{item.tenSanPhamChiTiet}</h3>
                     <p className="text-red-600 font-bold">
                       {parseFloat(item.donGia).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}
                     </p>

@@ -21,7 +21,7 @@ const HomePage = () => {
     const fetchLaptops = async () => {
       try {
         setLoading(true);
-        const response = await fetch('http://localhost:8080/rest/san_pham_chi_tiet/getAll');
+        const response = await fetch('http://localhost:8080/rest/spctDTO/getAll');
         if (!response.ok) {
           throw new Error('Network response was not ok');
         }
@@ -185,10 +185,10 @@ const HomePage = () => {
             {currentItems.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                 {currentItems.map((laptop) => (
-                  <div key={laptop.maDinhDanh} className="bg-white rounded-lg shadow-md overflow-hidden cursor-pointer group" onClick={() => window.location.href = `/chitietsanpham/${laptop.id}`}>
-                    <img src={laptop.sanPham.hinhAnh} alt={laptop.tenSpct} className="w-full h-48 object-cover" />
+                  <div key={laptop.id} className="bg-white rounded-lg shadow-md overflow-hidden cursor-pointer group" onClick={() => window.location.href = `/chitietsanpham/${laptop.id}`}>
+                    <img src={laptop.hinhAnh} alt={laptop.tenSanPhamChiTiet} className="w-full h-48 object-cover" />
                     <div className="p-3">
-                      <h3 className="text-sm font-semibold mb-1">{laptop.tenSpct}</h3>
+                      <h3 className="text-sm font-semibold mb-1">{laptop.tenSanPhamChiTiet}</h3>
                       <p className="text-red-600 font-bold text-lg mt-1">{laptop.donGia}</p>
                       <div className="mt-2">
                         {laptop.specs && Array.isArray(laptop.specs) && laptop.specs.map((spec, index) => (
@@ -224,33 +224,6 @@ const HomePage = () => {
               <p>Hiển thị {currentItems.length} trên {filteredLaptops.length} sản phẩm</p>
             </div>
 
-            {/* News Section */}
-            <div className="mb-8">
-              <h2 className="text-2xl font-bold mb-4">Tin tức mới nhất</h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="bg-white rounded-lg shadow-md overflow-hidden">
-                  <img src="https://images.macrumors.com/t/AJ8iZBqxqOAi7wqwzz8MyPYKYN0=/2500x0/article-new/2023/01/MacBook-Pro-M2-Pro-Max-General-Feature.jpg" alt="News 1" className="w-full h-48 object-cover"/>
-                  <div className="p-4">
-                    <h3 className="font-bold text-lg mb-2">MacBook Pro M2 Pro và M2 Max ra mắt</h3>
-                    <p className="text-gray-600">Apple vừa giới thiệu dòng MacBook Pro mới với chip M2 Pro và M2 Max...</p>
-                  </div>
-                </div>
-                <div className="bg-white rounded-lg shadow-md overflow-hidden">
-                  <img src="https://cdn.tgdd.vn/Files/2020/04/14/1249368/cach-su-dung-macbook-hieu-qua-cho-nguoi-moi_800x450.jpg" alt="News 2" className="w-full h-48 object-cover"/>
-                  <div className="p-4">
-                    <h3 className="font-bold text-lg mb-2">Hướng dẫn sử dụng MacBook cho người mới</h3>
-                    <p className="text-gray-600">Những thủ thuật và mẹo vặt giúp bạn làm quen với MacBook nhanh chóng...</p>
-                  </div>
-                </div>
-                <div className="bg-white rounded-lg shadow-md overflow-hidden">
-                  <img src="https://cdn.sforum.vn/sforum/wp-content/uploads/2023/06/MacBook-Air-15-inch-2.jpg" alt="News 3" className="w-full h-48 object-cover"/>
-                  <div className="p-4">
-                    <h3 className="font-bold text-lg mb-2">MacBook Air 15 inch - Đánh giá chi tiết</h3>
-                    <p className="text-gray-600">Trải nghiệm thực tế với MacBook Air màn hình lớn đầu tiên của Apple...</p>
-                  </div>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
       </main>

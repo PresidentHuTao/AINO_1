@@ -12,15 +12,15 @@ function OrderSummary({ cartItems, quantities, totalAmount, errors, loading, han
           <div key={item.maDinhDanh} className="flex items-center border-b pb-4">
             <div className="w-24 h-24 flex-shrink-0">
               <img
-                src={item.sanPham.hinhAnh}
-                alt={item.sanPham.tenSanPham}
+                src={item.hinhAnh}
+                alt={item.tenSanPham}
                 className="w-full h-full object-cover rounded"
               />
             </div>
 
             <div className="flex-1 ml-4">
               <h3 className="font-semibold text-lg">
-                {item.sanPham.tenSanPham}
+                {item.tenSanPhamCh}
               </h3>
               <div className="mt-2 text-gray-600">
                 <p>

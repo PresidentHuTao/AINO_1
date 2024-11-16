@@ -1,12 +1,25 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import NavbarAdmin from '../Navbar/NavbarAdmin';
 
 const CustomerManagement = () => {
-  const customers = [
-    { id: 1, name: 'Nguyễn Văn A', address: '123 Đường ABC, TP.HCM', phone: '0123456789', email: 'a@example.com' },
-    { id: 2, name: 'Trần Thị B', address: '456 Đường DEF, Hà Nội', phone: '0987654321', email: 'b@example.com' },
-    { id: 3, name: 'Lê Văn C', address: '789 Đường GHI, Đà Nẵng', phone: '0112233445', email: 'c@example.com' },
-  ];
+  const [customers, setCustomers] = useState([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch('http://localhost:8080/rest/tttk/getAll');
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        const data = await response.json();
+        setCustomers(data);
+      } catch (error) {
+        console.error('There was a problem with the fetch operation:', error);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   const handleDelete = (id) => {
     // Logic to delete customer
@@ -31,9 +44,9 @@ const CustomerManagement = () => {
           <tbody>
             {customers.map(customer => (
               <tr key={customer.id}>
-                <td className="py-2 px-4 border-b text-left">{customer.name}</td>
-                <td className="py-2 px-4 border-b text-left">{customer.address}</td>
-                <td className="py-2 px-4 border-b text-left">{customer.phone}</td>
+                <td className="py-2 px-4 border-b text-left">{customer.hoTen}</td>
+                <td className="py-2 px-4 border-b text-left">{customer.diaChi}</td>
+                <td className="py-2 px-4 border-b text-left">{customer.soDienThoai}</td>
                 <td className="py-2 px-4 border-b text-left">{customer.email}</td>
                 <td className="py-2 px-4 border-b text-left">
                   <button 

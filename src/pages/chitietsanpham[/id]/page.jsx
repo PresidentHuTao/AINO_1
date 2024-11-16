@@ -5,7 +5,7 @@ import Navbar from '../../../components/Layout/DefaultLayout/Navbar';
 import Footer from '../../../components/Layout/DefaultLayout/Footer';
 
 const ChiTietSanPham = () => {
-    const { maDinhDanh } = useParams(); // Lấy id sản phẩm từ URL
+    const { idSanPham } = useParams(); // Lấy id sản phẩm từ URL
     const [product, setProduct] = useState(null);
     const [laptops, setLaptops] = useState([]);
     const [relatedProducts, setRelatedProducts] = useState([]); // State for related products
@@ -14,7 +14,7 @@ const ChiTietSanPham = () => {
     useEffect(() => {
         const fetchProductDetails = async () => {
             try {
-                const response = await fetch(`http://localhost:8080/rest/san_pham_chi_tiet/getById/${maDinhDanh}`);
+                const response = await fetch(`http://localhost:8080/rest/spctDTO/getById/${idSanPham}`);
                 if (!response.ok) {
                     throw new Error('Network response was not ok');
                 }
@@ -26,19 +26,41 @@ const ChiTietSanPham = () => {
         };
 
         fetchProductDetails();
-    }, [maDinhDanh]); 
+    }, [idSanPham]); 
+
+    useEffect(() => {
+        const fetchProductImage = async () => {
+            try {
+                const response = await fetch(`http://localhost:8080/rest/san_pham_chi_tiet/getIMG/${idSanPham}`);
+                console.log(idSanPham);
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                const imageData = await response.json();
+                // Assuming imageData contains the image URL or path
+                setProduct(prevState => ({
+                    ...prevState,
+                    hinhAnh: imageData.imageUrl // Update the product state with the new image URL
+                }));
+            } catch (error) {
+                console.error('Error fetching product image:', error);
+            }
+        };
+
+        fetchProductImage();
+    }, [idSanPham]); 
 
     useEffect(() => {
         const fetchLaptops = async () => {
           try {
-            const response = await fetch('http://localhost:8080/rest/san_pham_chi_tiet/getAll'); // Fetch laptops from local server
+            const response = await fetch('http://localhost:8080/rest/spctDTO/getAll'); // Fetch laptops from local server
             if (!response.ok) {
               throw new Error('Network response was not ok');
             }
             const data = await response.json();
             setLaptops(data);
             // Filter related products based on the product's id
-            const related = data.filter(item => item.sanPham.id === product?.sanPham.id);
+            const related = data.filter(item => item.idSanPham === product?.idSanPham);
             setRelatedProducts(related);
           } catch (error) {
             console.error('Error fetching laptops:', error);
@@ -65,6 +87,9 @@ const ChiTietSanPham = () => {
 
     // Function to format price with commas
     const formatPrice = (price) => {
+        if (typeof price === 'undefined' || price === null) {
+            return 'N/A';
+        }
         return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
     };
 
@@ -76,23 +101,24 @@ const ChiTietSanPham = () => {
             <div className="flex flex-col md:flex-row bg-white shadow-lg rounded-lg overflow-hidden">
               
                 <div className="md:w-1/2">
-                    <img src={product.sanPham.hinhAnh} alt={product.sanPham.tenSanPham} className="w-full h-auto" />
+                    <img src={product.hinhAnh} alt={product.tenSanPham} className="w-full h-auto" />
                 </div>
                 <div className="md:w-1/2 p-4">
-                    <h1 className="text-2xl font-bold mb-2">{product.tenSpct}</h1>
-                    <p className="text-gray-700 mb-4">{product.sanPham.gioiThieu}</p>
+                    <h1 className="text-2xl font-bold mb-2">{product.tenSanPhamChiTiet}</h1>
+                    <p className="text-gray-700 mb-4">{product.gioiThieu}</p>
                     <p className="text-lg font-semibold mb-2">Giá: {formatPrice(product.donGia)} VNĐ</p>
-                    <p className="mb-2">Số lượng: {product.soLuong}</p>
-                    <p className="mb-4">Trạng thái: {product.trangThai}</p>
                     <h2 className="text-lg font-semibold mb-2">Thông tin chi tiết:</h2>
                     <ul className="list-disc pl-5 mb-4">
-                        <li>Mã sản phẩm: {product.maDinhDanh}</li>
-                        <li>Hãng sản xuất: {product.sanPham.hangSanXuat}</li>
-                        <li>GPU: {product.gpu.ten}</li>
-                        <li>RAM: {product.ram.dungLuong} GB, Tốc độ: {product.ram.tocDo} MHz</li>
-                        <li>GPU: {product.gpu.ten}, VRAM: {product.gpu.vram} GB</li>
-                        <li>Màn hình: {product.manHinh.kichThuoc} inch, Độ phân giải: {product.manHinh.doPhanGiai}</li>
-                        <li>Ổ lưu trữ: {product.oluuTru.dungLuong} GB, Loại: {product.oluuTru.loaiOCung}</li>
+                        <li>Mã sản phẩm: {product.maSpct}</li>
+                        <li>Chất liệu: {product.chatLieu}</li>
+                        <li>RAM: {product.dungLuongRam} GB</li>
+                        <li>Ổ lưu trữ: {product.dungLuong} GB</li>
+                        <li>Màn hình: {product.kichThuocLaptop} inch, Độ phân giải: {product.doPhanGiai}</li>
+                        <li>Tần số quét: {product.tanSoQuet} Hz</li>
+                        <li>Số nhân: {product.soNhan}</li>
+                        <li>Kiến trúc công nghệ: {product.kienTrucCongNghe}</li>
+                        <li>CPU: {product.tenCPU}</li>
+                        <li>Mã SPCT: {product.maSpct}</li>
                     </ul>
                     <div className="flex justify-between mt-4">
                         <button onClick={handleBuyNow} className="px-4 py-2 bg-green-500 text-white rounded-md">Mua ngay</button>
@@ -105,8 +131,8 @@ const ChiTietSanPham = () => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                     {relatedProducts.map((relatedProduct) => (
                         <div key={relatedProduct.id} className="bg-white rounded-lg shadow-md p-4" onClick={() => handleRelatedProductClick(relatedProduct)}>
-                            <img src={relatedProduct.sanPham.hinhAnh} alt={relatedProduct.sanPham.tenSanPham} className="w-full h-32 object-cover mb-2" />
-                            <h3 className="font-semibold">{relatedProduct.tenSpct}</h3>
+                            <img src={relatedProduct.hinhAnh} alt={relatedProduct.tenSanPham} className="w-full h-32 object-cover mb-2" />
+                            <h3 className="font-semibold">{relatedProduct.tenSanPhamChiTiet}</h3>
                             <p className="text-red-600 font-bold">{formatPrice(relatedProduct.donGia)} VNĐ</p>
                             <button onClick={(e) => { e.stopPropagation(); handleAddToCart(relatedProduct); }} className="mt-2 px-4 py-2 bg-blue-500 text-white rounded-md">Thêm vào giỏ</button>
                         </div>

@@ -6,18 +6,16 @@ const ProductManagement = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newProduct, setNewProduct] = useState({
     tenSanPham: '',
-    hangSanXuat: '',
     namSanXuat: '',
     trongLuong: '',
-    mauSac: '',
-    hinhAnh: null // Changed to null to avoid issues with file input
+    duongDanHinhAnh: null // Changed to null to avoid issues with file input
   });
   const [imagePreview, setImagePreview] = useState(null); // State for image preview
 
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await fetch('http://localhost:8080/rest/san_pham/getAll');
+        const response = await fetch('http://localhost:8080/rest/san_pham/getDTOADMIN');
         const data = await response.json();
         setProducts(data); 
       } catch (error) {
@@ -29,9 +27,9 @@ const ProductManagement = () => {
   }, []);
 
   const handleAddProduct = async () => {
-    if (newProduct.tenSanPham && newProduct.hinhAnh) {
+    if (newProduct.tenSanPham && newProduct.duongDanHinhAnh) {
       const formData = new FormData();
-      formData.append('file', newProduct.hinhAnh);
+      formData.append('file', newProduct.duongDanHinhAnh);
       
       try {
         const uploadResponse = await fetch('https://api.postimages.org/upload', {
@@ -46,14 +44,12 @@ const ProductManagement = () => {
         const uploadData = await uploadResponse.json();
         const imageUrl = uploadData.data.url;
   
-        setProducts([...products, { ...newProduct, hinhAnh: imageUrl }]);
+        setProducts([...products, { ...newProduct, duongDanHinhAnh: imageUrl }]);
         setNewProduct({
           tenSanPham: '',
-          hangSanXuat: '',
           namSanXuat: '',
           trongLuong: '',
-          mauSac: '',
-          hinhAnh: null // Reset to null after adding product
+          duongDanHinhAnh: null // Reset to null after adding product
         });
         setImagePreview(null); // Reset image preview
         setIsModalOpen(false);
@@ -69,7 +65,7 @@ const ProductManagement = () => {
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      setNewProduct({ ...newProduct, hinhAnh: file });
+      setNewProduct({ ...newProduct, duongDanHinhAnh: file });
       const reader = new FileReader();
       reader.onloadend = () => {
         setImagePreview(reader.result); // Set image preview
@@ -96,23 +92,21 @@ const ProductManagement = () => {
             <tr>
               <th className="border px-4 py-2">Hình Ảnh</th>
               <th className="border px-4 py-2">Tên Sản Phẩm</th>
-              <th className="border px-4 py-2">Hãng Sản Xuất</th>
               <th className="border px-4 py-2">Năm Sản Xuất</th>
               <th className="border px-4 py-2">Trọng Lượng</th>
-              <th className="border px-4 py-2">Màu Sắc</th>
+              <th className="border px-4 py-2">Loại Sản Phẩm</th>
             </tr>
           </thead>
           <tbody>
             {products.map((product, index) => (
               <tr key={index}>
                 <td className="border px-4 py-2">
-                  <img src={product.hinhAnh} alt={product.tenSanPham} className="w-16 h-16 object-cover" />
+                  <img src={product.duongDanHinhAnh} alt={product.tenSanPham} className="w-16 h-16 object-cover" />
                 </td>
                 <td className="border px-4 py-2">{product.tenSanPham}</td>
-                <td className="border px-4 py-2">{product.hangSanXuat}</td>
                 <td className="border px-4 py-2">{product.namSanXuat}</td>
                 <td className="border px-4 py-2">{product.trongLuong}</td>
-                <td className="border px-4 py-2">{product.mauSac}</td>
+                <td className="border px-4 py-2">{product.tenLoai}</td>
               </tr>
             ))}
           </tbody>
@@ -130,18 +124,18 @@ const ProductManagement = () => {
                 placeholder="Tên sản phẩm"
               />
               <input 
-                type="text" 
-                value={newProduct.hangSanXuat} 
-                onChange={(e) => setNewProduct({ ...newProduct, hangSanXuat: e.target.value })} 
-                className="border p-2 w-full mb-4"
-                placeholder="Hãng sản xuất"
-              />
-              <input 
-                type="text" 
+                type="number" 
                 value={newProduct.namSanXuat} 
                 onChange={(e) => setNewProduct({ ...newProduct, namSanXuat: e.target.value })} 
                 className="border p-2 w-full mb-4"
                 placeholder="Năm sản xuất"
+              />
+              <input 
+                type="text" 
+                value={newProduct.trongLuong} 
+                onChange={(e) => setNewProduct({ ...newProduct, trongLuong: e.target.value })} 
+                className="border p-2 w-full mb-4"
+                placeholder="Trọng lượng"
               />
               <input 
                 type="file" 
@@ -153,20 +147,6 @@ const ProductManagement = () => {
               {imagePreview && (
                 <img src={imagePreview} alt="Preview" className="w-32 h-32 object-cover mb-4" />
               )}
-              <input 
-                type="text" 
-                value={newProduct.trongLuong} 
-                onChange={(e) => setNewProduct({ ...newProduct, trongLuong: e.target.value })} 
-                className="border p-2 w-full mb-4"
-                placeholder="Trọng lượng"
-              />
-              <input 
-                type="text" 
-                value={newProduct.mauSac} 
-                onChange={(e) => setNewProduct({ ...newProduct, mauSac: e.target.value })} 
-                className="border p-2 w-full mb-4"
-                placeholder="Màu sắc"
-              />
               <button 
                 onClick={handleAddProduct} 
                 className="px-4 py-2 bg-green-500 text-white rounded"
