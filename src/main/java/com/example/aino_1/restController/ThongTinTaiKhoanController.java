@@ -26,4 +26,13 @@ public class ThongTinTaiKhoanController {
     public ThongTinTaiKhoan getById(@PathVariable Integer id) {
         return tttksi.findById(id).get();
     }
+    @PutMapping("/update/{id}")
+    public ThongTinTaiKhoan update(@RequestBody ThongTinTaiKhoan tk) {
+        return tttksi.save(tk);
+    }
+
+    @PostMapping("/add")
+    public ThongTinTaiKhoan create(@RequestBody ThongTinTaiKhoan tk) {
+        return tttksi.save(tk);
+    }
 }
