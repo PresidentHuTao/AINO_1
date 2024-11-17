@@ -5,17 +5,32 @@ import axios from 'axios';
 const ProductManagement = () => {
   const [products, setProducts] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+  const [selectedProductImages, setSelectedProductImages] = useState([]);
   const [newProduct, setNewProduct] = useState({
     tenSanPham: '',
     namSanXuat: '',
     trongLuong: '',
     gioiThieu: '',
-    baoHanh: '',
-    loaiSanPhamId: '',
-    nguonNhapId: '',
-    chatLieuId: '',
-    cardDoHoaId: '',
-    ktltId: ''
+    thoiHanBaoHanh: '',
+    loaiSanPham: {
+      id: ''
+    },
+    nguonNhap: {
+      id: ''
+    },
+    chatLieu: {
+      id: ''
+    },
+    cardDoHoa: {
+      id: ''
+    },
+    kichThuocLaptop: {
+      id: ''
+    },
+    pin: '',
+    trangThai: 1,
+    duongDanHinhAnh: ''
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -28,7 +43,7 @@ const ProductManagement = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await fetch('http://localhost:8080/rest/san_pham/getDTOADMIN');
+        const response = await fetch('http://localhost:8080/rest/san_pham/getAll');
         const data = await response.json();
         setProducts(data); 
       } catch (error) {
@@ -45,7 +60,6 @@ const ProductManagement = () => {
           axios.get('http://localhost:8080/rest/card_do_hoa/getAll'),
           axios.get('http://localhost:8080/rest/ktlt/getAll')
         ]);
-
         setLoaiSanPhams(loaiRes.data);
         setNguonNhaps(nguonRes.data);
         setChatLieus(chatLieuRes.data);
@@ -60,29 +74,61 @@ const ProductManagement = () => {
     fetchOptions();
   }, []);
 
+  const handleViewImages = async (productId) => {
+    try {
+      const response = await axios.get(`http://localhost:8080/rest/hinh_anh/getByid/${productId}`);
+      setSelectedProductImages(response.data);
+      setIsImageModalOpen(true);
+    } catch (error) {
+      console.error('Error fetching product images:', error);
+    }
+  };
+
   const handleAddProduct = async () => {
     if (newProduct.tenSanPham) {
       setLoading(true);
       setError(null);
       
       try {
-        setProducts([...products, { ...newProduct }]);
-        setNewProduct({
-          tenSanPham: '',
-          namSanXuat: '',
-          trongLuong: '',
-          gioiThieu: '',
-          baoHanh: '',
-          loaiSanPhamId: '',
-          nguonNhapId: '',
-          chatLieuId: '',
-          cardDoHoaId: '',
-          ktltId: ''
-        });
-        setIsModalOpen(false);
+        const response = await axios.post('http://localhost:8080/rest/san_pham/add', newProduct);
+        
+        if (response.status === 200) {
+          // Refresh product list after successful add
+          const updatedResponse = await fetch('http://localhost:8080/rest/san_pham/getAll');
+          const updatedData = await updatedResponse.json();
+          setProducts(updatedData);
+          
+          // Reset form
+          setNewProduct({
+            tenSanPham: '',
+            namSanXuat: '',
+            trongLuong: '',
+            gioiThieu: '',
+            thoiHanBaoHanh: '',
+            loaiSanPham: {
+              id: ''
+            },
+            nguonNhap: {
+              id: ''
+            },
+            chatLieu: {
+              id: ''
+            },
+            cardDoHoa: {
+              id: ''
+            },
+            kichThuocLaptop: {
+              id: ''
+            },
+            pin: '',
+            trangThai: 1,
+            duongDanHinhAnh: ''
+          });
+          setIsModalOpen(false);
+        }
       } catch (error) {
         console.error('Error adding product:', error);
-        setError('Failed to add product. Please try again.');
+        setError('Thêm sản phẩm thất bại. Vui lòng thử lại.');
         if (error.response) {
           console.error('Error details:', error.response.data);
         }
@@ -115,18 +161,29 @@ const ProductManagement = () => {
               <th className="border px-4 py-2">Năm Sản Xuất</th>
               <th className="border px-4 py-2">Trọng Lượng</th>
               <th className="border px-4 py-2">Loại Sản Phẩm</th>
+              <th className="border px-4 py-2">Thao tác</th>
             </tr>
           </thead>
           <tbody>
             {products.map((product, index) => (
               <tr key={index}>
                 <td className="border px-4 py-2">
-                  <img src={product.duongDanHinhAnh} alt={product.tenSanPham} className="w-16 h-16 object-cover" />
+                  {product.duongDanHinhAnh && (
+                    <img src={product.duongDanHinhAnh} alt={product.tenSanPham} className="w-16 h-16 object-cover" />
+                  )}
                 </td>
                 <td className="border px-4 py-2">{product.tenSanPham}</td>
                 <td className="border px-4 py-2">{product.namSanXuat}</td>
                 <td className="border px-4 py-2">{product.trongLuong}</td>
                 <td className="border px-4 py-2">{product.tenLoai}</td>
+                <td className="border px-4 py-2">
+                  <button
+                    onClick={() => handleViewImages(product.id)}
+                    className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
+                  >
+                    Xem ảnh
+                  </button>
+                </td>
               </tr>
             ))}
           </tbody>
@@ -144,17 +201,18 @@ const ProductManagement = () => {
                 placeholder="Tên sản phẩm"
               />
               <input 
-                type="date" 
+                type="number" 
                 value={newProduct.namSanXuat} 
-                onChange={(e) => setNewProduct({ ...newProduct, namSanXuat: e.target.value })} 
+                onChange={(e) => setNewProduct({ ...newProduct, namSanXuat: parseInt(e.target.value) })} 
                 className="border p-2 w-full mb-4"
+                placeholder="Năm sản xuất"
               />
               <input 
-                type="text" 
+                type="number" 
                 value={newProduct.trongLuong} 
-                onChange={(e) => setNewProduct({ ...newProduct, trongLuong: e.target.value })} 
+                onChange={(e) => setNewProduct({ ...newProduct, trongLuong: parseFloat(e.target.value) })} 
                 className="border p-2 w-full mb-4"
-                placeholder="Trọng lượng"
+                placeholder="Trọng lượng (kg)"
               />
               <textarea
                 value={newProduct.gioiThieu}
@@ -165,14 +223,28 @@ const ProductManagement = () => {
               />
               <input 
                 type="text"
-                value={newProduct.baoHanh}
-                onChange={(e) => setNewProduct({ ...newProduct, baoHanh: e.target.value })}
+                value={newProduct.thoiHanBaoHanh}
+                onChange={(e) => setNewProduct({ ...newProduct, thoiHanBaoHanh: e.target.value })}
                 className="border p-2 w-full mb-4"
-                placeholder="Bảo hành"
+                placeholder="Thời hạn bảo hành"
+              />
+              <input 
+                type="number"
+                value={newProduct.pin}
+                onChange={(e) => setNewProduct({ ...newProduct, pin: parseInt(e.target.value) })}
+                className="border p-2 w-full mb-4"
+                placeholder="Dung lượng pin (Wh)"
+              />
+              <input
+                type="text"
+                value={newProduct.duongDanHinhAnh}
+                onChange={(e) => setNewProduct({ ...newProduct, duongDanHinhAnh: e.target.value })}
+                className="border p-2 w-full mb-4"
+                placeholder="Đường dẫn hình ảnh"
               />
               <select
-                value={newProduct.loaiSanPhamId}
-                onChange={(e) => setNewProduct({ ...newProduct, loaiSanPhamId: e.target.value })}
+                value={newProduct.loaiSanPham.id}
+                onChange={(e) => setNewProduct({ ...newProduct, loaiSanPham: { id: e.target.value } })}
                 className="border p-2 w-full mb-4"
               >
                 <option value="">Chọn loại sản phẩm</option>
@@ -181,8 +253,8 @@ const ProductManagement = () => {
                 ))}
               </select>
               <select
-                value={newProduct.nguonNhapId}
-                onChange={(e) => setNewProduct({ ...newProduct, nguonNhapId: e.target.value })}
+                value={newProduct.nguonNhap.id}
+                onChange={(e) => setNewProduct({ ...newProduct, nguonNhap: { id: e.target.value } })}
                 className="border p-2 w-full mb-4"
               >
                 <option value="">Chọn nguồn nhập</option>
@@ -191,8 +263,8 @@ const ProductManagement = () => {
                 ))}
               </select>
               <select
-                value={newProduct.chatLieuId}
-                onChange={(e) => setNewProduct({ ...newProduct, chatLieuId: e.target.value })}
+                value={newProduct.chatLieu.id}
+                onChange={(e) => setNewProduct({ ...newProduct, chatLieu: { id: e.target.value } })}
                 className="border p-2 w-full mb-4"
               >
                 <option value="">Chọn chất liệu</option>
@@ -201,8 +273,8 @@ const ProductManagement = () => {
                 ))}
               </select>
               <select
-                value={newProduct.cardDoHoaId}
-                onChange={(e) => setNewProduct({ ...newProduct, cardDoHoaId: e.target.value })}
+                value={newProduct.cardDoHoa.id}
+                onChange={(e) => setNewProduct({ ...newProduct, cardDoHoa: { id: e.target.value } })}
                 className="border p-2 w-full mb-4"
               >
                 <option value="">Chọn card đồ họa</option>
@@ -211,8 +283,8 @@ const ProductManagement = () => {
                 ))}
               </select>
               <select
-                value={newProduct.ktltId}
-                onChange={(e) => setNewProduct({ ...newProduct, ktltId: e.target.value })}
+                value={newProduct.kichThuocLaptop.id}
+                onChange={(e) => setNewProduct({ ...newProduct, kichThuocLaptop: { id: e.target.value } })}
                 className="border p-2 w-full mb-4"
               >
                 <option value="">Chọn kích thước laptop</option>
@@ -234,6 +306,32 @@ const ProductManagement = () => {
                 <button 
                   onClick={() => setIsModalOpen(false)} 
                   className="ml-2 px-4 py-2 bg-red-500 text-white rounded"
+                >
+                  Đóng
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {isImageModalOpen && (
+          <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+            <div className="bg-white p-6 rounded shadow-lg max-w-4xl w-full">
+              <h2 className="text-lg font-bold mb-4">Hình ảnh sản phẩm</h2>
+              <div className="grid grid-cols-3 gap-4">
+                {selectedProductImages.map((image, index) => (
+                  <img 
+                    key={index}
+                    src={image.duongDan} 
+                    alt={`Product image ${index + 1}`}
+                    className="w-full h-48 object-cover rounded"
+                  />
+                ))}
+              </div>
+              <div className="flex justify-end mt-4">
+                <button 
+                  onClick={() => setIsImageModalOpen(false)}
+                  className="px-4 py-2 bg-red-500 text-white rounded"
                 >
                   Đóng
                 </button>
