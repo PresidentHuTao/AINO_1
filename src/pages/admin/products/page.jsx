@@ -1,170 +1,96 @@
 import React, { useState, useEffect } from 'react';
 import NavbarAdmin from '../Navbar/NavbarAdmin';
+import axios from 'axios';
 
 const ProductManagement = () => {
   const [products, setProducts] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [newProduct, setNewProduct] = useState({
     tenSanPham: '',
     namSanXuat: '',
     trongLuong: '',
-    duongDanHinhAnh: null
+    gioiThieu: '',
+    baoHanh: '',
+    loaiSanPhamId: '',
+    nguonNhapId: '',
+    chatLieuId: '',
+    cardDoHoaId: '',
+    ktltId: ''
   });
-  const [editProduct, setEditProduct] = useState(null);
-  const [imagePreview, setImagePreview] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [loaiSanPhams, setLoaiSanPhams] = useState([]);
+  const [nguonNhaps, setNguonNhaps] = useState([]);
+  const [chatLieus, setChatLieus] = useState([]);
+  const [cardDoHoas, setCardDoHoas] = useState([]);
+  const [ktlts, setKtlts] = useState([]);
 
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         const response = await fetch('http://localhost:8080/rest/san_pham/getDTOADMIN');
         const data = await response.json();
-        setProducts(data);
+        setProducts(data); 
       } catch (error) {
         console.error('Error fetching products:', error);
       }
     };
 
+    const fetchOptions = async () => {
+      try {
+        const [loaiRes, nguonRes, chatLieuRes, cardRes, ktltRes] = await Promise.all([
+          axios.get('http://localhost:8080/rest/loai_san_pham/getAll'),
+          axios.get('http://localhost:8080/rest/nguon_nhap/getAll'),
+          axios.get('http://localhost:8080/rest/chat_lieu/getAll'),
+          axios.get('http://localhost:8080/rest/card_do_hoa/getAll'),
+          axios.get('http://localhost:8080/rest/ktlt/getAll')
+        ]);
+
+        setLoaiSanPhams(loaiRes.data);
+        setNguonNhaps(nguonRes.data);
+        setChatLieus(chatLieuRes.data);
+        setCardDoHoas(cardRes.data);
+        setKtlts(ktltRes.data);
+      } catch (error) {
+        console.error('Error fetching options:', error);
+      }
+    };
+
     fetchProducts();
+    fetchOptions();
   }, []);
 
   const handleAddProduct = async () => {
-    if (newProduct.tenSanPham && newProduct.duongDanHinhAnh) {
-      const formData = new FormData();
-      formData.append('file', newProduct.duongDanHinhAnh);
+    if (newProduct.tenSanPham) {
+      setLoading(true);
+      setError(null);
       
       try {
-        const uploadResponse = await fetch('https://api.postimages.org/upload', {
-          method: 'POST',
-          body: formData,
-        });
-  
-        if (!uploadResponse.ok) {
-          throw new Error('Failed to upload image');
-        }
-  
-        const uploadData = await uploadResponse.json();
-        const imageUrl = uploadData.data.url;
-  
-        setProducts([...products, { ...newProduct, duongDanHinhAnh: imageUrl }]);
+        setProducts([...products, { ...newProduct }]);
         setNewProduct({
           tenSanPham: '',
           namSanXuat: '',
           trongLuong: '',
-          duongDanHinhAnh: null
+          gioiThieu: '',
+          baoHanh: '',
+          loaiSanPhamId: '',
+          nguonNhapId: '',
+          chatLieuId: '',
+          cardDoHoaId: '',
+          ktltId: ''
         });
-        setImagePreview(null);
         setIsModalOpen(false);
       } catch (error) {
-        console.error('Error uploading image:', error);
-        alert("Không thể tải ảnh lên. Vui lòng kiểm tra lại kết nối hoặc URL API.");
+        console.error('Error adding product:', error);
+        setError('Failed to add product. Please try again.');
+        if (error.response) {
+          console.error('Error details:', error.response.data);
+        }
+      } finally {
+        setLoading(false);
       }
     } else {
-      alert('Tên sản phẩm và hình ảnh là bắt buộc');
-    }
-  };
-
-  const handleEditClick = (product) => {
-    setEditProduct({...product});
-    setImagePreview(product.duongDanHinhAnh);
-    setIsEditModalOpen(true);
-  };
-
-  const handleUpdateProduct = async () => {
-    try {
-      let imageUrl = editProduct.duongDanHinhAnh;
-
-      // If a new image was selected, upload it first
-      if (editProduct.duongDanHinhAnh instanceof File) {
-        const formData = new FormData();
-        formData.append('file', editProduct.duongDanHinhAnh);
-        
-        const uploadResponse = await fetch('https://api.postimages.org/upload', {
-          method: 'POST',
-          body: formData,
-        });
-
-        if (!uploadResponse.ok) {
-          throw new Error('Failed to upload image');
-        }
-
-        const uploadData = await uploadResponse.json();
-        imageUrl = uploadData.data.url;
-      }
-
-      const response = await fetch(`http://localhost:8080/rest/san_pham/update/${editProduct.id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          id: editProduct.id,
-          loaiSanPham: {
-            id: editProduct.loaiSanPham.id
-          },
-          nguonNhap: {
-            id: editProduct.nguonNhap.id
-          },
-          chatLieu: {
-            id: editProduct.chatLieu.id
-          },
-          kichThuocLaptop: {
-            id: editProduct.kichThuocLaptop.id
-          },
-          tenSanPham: editProduct.tenSanPham,
-          namSanXuat: editProduct.namSanXuat,
-          trongLuong: editProduct.trongLuong,
-          gioiThieu: editProduct.gioiThieu,
-          thoiHanBaoHanh: editProduct.thoiHanBaoHanh,
-          cardDoHoa: editProduct.cardDoHoa,
-          pin: editProduct.pin,
-          trangThai: editProduct.trangThai,
-          duongDanHinhAnh: imageUrl
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to update product');
-      }
-
-      // Update the products list
-      const updatedProducts = products.map(p => {
-        if (p.id === editProduct.id) {
-          return {
-            ...p,
-            tenSanPham: editProduct.tenSanPham,
-            namSanXuat: editProduct.namSanXuat,
-            trongLuong: editProduct.trongLuong,
-            duongDanHinhAnh: imageUrl
-          };
-        }
-        return p;
-      });
-      
-      setProducts(updatedProducts);
-      setIsEditModalOpen(false);
-      setEditProduct(null);
-      setImagePreview(null);
-      alert('Cập nhật sản phẩm thành công!');
-    } catch (error) {
-      console.error('Error updating product:', error);
-      alert('Không thể cập nhật sản phẩm. Vui lòng thử lại.');
-    }
-  };
-
-  const handleImageChange = (e, isEdit = false) => {
-    const file = e.target.files[0];
-    if (file) {
-      if (isEdit) {
-        setEditProduct({ ...editProduct, duongDanHinhAnh: file });
-      } else {
-        setNewProduct({ ...newProduct, duongDanHinhAnh: file });
-      }
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result);
-      };
-      reader.readAsDataURL(file);
+      setError('Tên sản phẩm là bắt buộc');
     }
   };
 
@@ -176,163 +102,140 @@ const ProductManagement = () => {
         <div className="mb-4">
           <button 
             onClick={() => setIsModalOpen(true)} 
-            className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-5 rounded-lg transition duration-200"
+            className="px-4 py-2 bg-blue-500 text-white rounded"
           >
             Thêm sản phẩm
           </button>
         </div>
-
-        <div className="bg-white rounded-lg shadow overflow-hidden">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Hình Ảnh</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tên Sản Phẩm</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Năm Sản Xuất</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Trọng Lượng</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Loại Sản Phẩm</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Thao tác</th>
+        <table className="min-w-full bg-white border border-gray-300">
+          <thead>
+            <tr>
+              <th className="border px-4 py-2">Hình Ảnh</th>
+              <th className="border px-4 py-2">Tên Sản Phẩm</th>
+              <th className="border px-4 py-2">Năm Sản Xuất</th>
+              <th className="border px-4 py-2">Trọng Lượng</th>
+              <th className="border px-4 py-2">Loại Sản Phẩm</th>
+            </tr>
+          </thead>
+          <tbody>
+            {products.map((product, index) => (
+              <tr key={index}>
+                <td className="border px-4 py-2">
+                  <img src={product.duongDanHinhAnh} alt={product.tenSanPham} className="w-16 h-16 object-cover" />
+                </td>
+                <td className="border px-4 py-2">{product.tenSanPham}</td>
+                <td className="border px-4 py-2">{product.namSanXuat}</td>
+                <td className="border px-4 py-2">{product.trongLuong}</td>
+                <td className="border px-4 py-2">{product.tenLoai}</td>
               </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {products.map((product, index) => (
-                <tr key={index} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <img src={product.duongDanHinhAnh} alt={product.tenSanPham} className="w-16 h-16 rounded-lg object-cover" />
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium text-gray-900">{product.tenSanPham}</div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{product.namSanXuat}</div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{product.trongLuong}</div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
-                      {product.tenLoai}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <button
-                      onClick={() => handleEditClick(product)}
-                      className="text-indigo-600 hover:text-indigo-900"
-                    >
-                      Sửa
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+            ))}
+          </tbody>
+        </table>
 
         {isModalOpen && (
           <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-            <div className="bg-white p-8 rounded-lg shadow-lg max-w-md w-full">
-              <h2 className="text-xl font-bold mb-6">Thêm sản phẩm mới</h2>
+            <div className="bg-white p-6 rounded shadow-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+              <h2 className="text-lg font-bold mb-4">Thêm sản phẩm mới</h2>
               <input 
                 type="text" 
                 value={newProduct.tenSanPham} 
                 onChange={(e) => setNewProduct({ ...newProduct, tenSanPham: e.target.value })} 
-                className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 mb-4"
+                className="border p-2 w-full mb-4"
                 placeholder="Tên sản phẩm"
               />
               <input 
-                type="number" 
+                type="date" 
                 value={newProduct.namSanXuat} 
                 onChange={(e) => setNewProduct({ ...newProduct, namSanXuat: e.target.value })} 
-                className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 mb-4"
-                placeholder="Năm sản xuất"
+                className="border p-2 w-full mb-4"
               />
               <input 
                 type="text" 
                 value={newProduct.trongLuong} 
                 onChange={(e) => setNewProduct({ ...newProduct, trongLuong: e.target.value })} 
-                className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 mb-4"
+                className="border p-2 w-full mb-4"
                 placeholder="Trọng lượng"
               />
-              <input 
-                type="file" 
-                accept="image/*"
-                onChange={(e) => handleImageChange(e, false)} 
-                className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 mb-4"
+              <textarea
+                value={newProduct.gioiThieu}
+                onChange={(e) => setNewProduct({ ...newProduct, gioiThieu: e.target.value })}
+                className="border p-2 w-full mb-4"
+                placeholder="Giới thiệu"
+                rows="3"
               />
-              {imagePreview && (
-                <img src={imagePreview} alt="Preview" className="w-32 h-32 object-cover rounded-lg mb-4" />
-              )}
-              <div className="flex justify-end gap-4">
+              <input 
+                type="text"
+                value={newProduct.baoHanh}
+                onChange={(e) => setNewProduct({ ...newProduct, baoHanh: e.target.value })}
+                className="border p-2 w-full mb-4"
+                placeholder="Bảo hành"
+              />
+              <select
+                value={newProduct.loaiSanPhamId}
+                onChange={(e) => setNewProduct({ ...newProduct, loaiSanPhamId: e.target.value })}
+                className="border p-2 w-full mb-4"
+              >
+                <option value="">Chọn loại sản phẩm</option>
+                {loaiSanPhams.map((loai) => (
+                  <option key={loai.id} value={loai.id}>{loai.tenLoai}</option>
+                ))}
+              </select>
+              <select
+                value={newProduct.nguonNhapId}
+                onChange={(e) => setNewProduct({ ...newProduct, nguonNhapId: e.target.value })}
+                className="border p-2 w-full mb-4"
+              >
+                <option value="">Chọn nguồn nhập</option>
+                {nguonNhaps.map((nguon) => (
+                  <option key={nguon.id} value={nguon.id}>{nguon.tenNhaCungUng}</option>
+                ))}
+              </select>
+              <select
+                value={newProduct.chatLieuId}
+                onChange={(e) => setNewProduct({ ...newProduct, chatLieuId: e.target.value })}
+                className="border p-2 w-full mb-4"
+              >
+                <option value="">Chọn chất liệu</option>
+                {chatLieus.map((chatLieu) => (
+                  <option key={chatLieu.id} value={chatLieu.id}>{chatLieu.tenChatLieu}</option>
+                ))}
+              </select>
+              <select
+                value={newProduct.cardDoHoaId}
+                onChange={(e) => setNewProduct({ ...newProduct, cardDoHoaId: e.target.value })}
+                className="border p-2 w-full mb-4"
+              >
+                <option value="">Chọn card đồ họa</option>
+                {cardDoHoas.map((card) => (
+                  <option key={card.id} value={card.id}>{card.tenCard}</option>
+                ))}
+              </select>
+              <select
+                value={newProduct.ktltId}
+                onChange={(e) => setNewProduct({ ...newProduct, ktltId: e.target.value })}
+                className="border p-2 w-full mb-4"
+              >
+                <option value="">Chọn kích thước laptop</option>
+                {ktlts.map((ktlt) => (
+                  <option key={ktlt.id} value={ktlt.id}>{ktlt.kichThuoc} inch</option>
+                ))}
+              </select>
+              {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
+              <div className="flex justify-end">
                 <button 
-                  onClick={() => {
-                    setIsModalOpen(false);
-                    setImagePreview(null);
-                  }} 
-                  className="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white font-semibold rounded-lg transition duration-200"
+                  onClick={handleAddProduct}
+                  disabled={loading}
+                  className={`px-4 py-2 rounded ${
+                    loading ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-500'
+                  } text-white`}
                 >
-                  Hủy
+                  {loading ? 'Đang tải...' : 'Thêm'}
                 </button>
                 <button 
-                  onClick={handleAddProduct} 
-                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition duration-200"
+                  onClick={() => setIsModalOpen(false)} 
+                  className="ml-2 px-4 py-2 bg-red-500 text-white rounded"
                 >
-                  Thêm
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {isEditModalOpen && editProduct && (
-          <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-            <div className="bg-white p-8 rounded-lg shadow-lg max-w-md w-full">
-              <h2 className="text-xl font-bold mb-6">Sửa sản phẩm</h2>
-              <input 
-                type="text" 
-                value={editProduct.tenSanPham} 
-                onChange={(e) => setEditProduct({ ...editProduct, tenSanPham: e.target.value })} 
-                className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 mb-4"
-                placeholder="Tên sản phẩm"
-              />
-              <input 
-                type="number" 
-                value={editProduct.namSanXuat} 
-                onChange={(e) => setEditProduct({ ...editProduct, namSanXuat: e.target.value })} 
-                className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 mb-4"
-                placeholder="Năm sản xuất"
-              />
-              <input 
-                type="text" 
-                value={editProduct.trongLuong} 
-                onChange={(e) => setEditProduct({ ...editProduct, trongLuong: e.target.value })} 
-                className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 mb-4"
-                placeholder="Trọng lượng"
-              />
-              <input 
-                type="file" 
-                accept="image/*"
-                onChange={(e) => handleImageChange(e, true)} 
-                className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 mb-4"
-              />
-              {imagePreview && (
-                <img src={imagePreview} alt="Preview" className="w-32 h-32 object-cover rounded-lg mb-4" />
-              )}
-              <div className="flex justify-end gap-4">
-                <button 
-                  onClick={() => {
-                    setIsEditModalOpen(false);
-                    setEditProduct(null);
-                    setImagePreview(null);
-                  }} 
-                  className="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white font-semibold rounded-lg transition duration-200"
-                >
-                  Hủy
-                </button>
-                <button 
-                  onClick={handleUpdateProduct} 
-                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition duration-200"
-                >
-                  Cập nhật
+                  Đóng
                 </button>
               </div>
             </div>
