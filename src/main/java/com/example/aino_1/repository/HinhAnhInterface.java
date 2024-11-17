@@ -12,4 +12,5 @@ public interface HinhAnhInterface extends JpaRepository<HinhAnh, Integer> {
     @Modifying
     @Query("DELETE FROM HinhAnh h WHERE h.sanPham.id = :sanPhamId")
     void deleteBySanPhamId(@Param("sanPhamId") Integer sanPhamId);
+
 }
