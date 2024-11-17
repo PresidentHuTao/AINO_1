@@ -173,11 +173,11 @@ const ChiTietSanPham = () => {
                                 </div>
                                 <div>
                                     <p className="text-gray-600">Card đồ họa:</p>
-                                    <p className="font-medium">{selectedConfig.cardDoHoa}</p>
+                                    <p className="font-medium">{selectedConfig.gpu} </p>
                                 </div>
                                 <div>
-                                    <p className="text-gray-600">Hệ điều hành:</p>
-                                    <p className="font-medium">{selectedConfig.heDieuHanh}</p>
+                                    <p className="text-gray-600">Card đồ họa rời:</p>
+                                    <p className="font-medium">{selectedConfig.cardDoHoaRoi ? selectedConfig.cardDoHoaRoi : 'Không có'} </p>
                                 </div>
                                 <div>
                                     <p className="text-gray-600">Pin:</p>
@@ -189,7 +189,7 @@ const ChiTietSanPham = () => {
                                 </div>
                                 <div>
                                     <p className="text-gray-600">Bảo hành:</p>
-                                    <p className="font-medium">{selectedConfig.baoHanh} tháng</p>
+                                    <p className="font-medium">{selectedConfig.baoHanh} </p>
                                 </div>
                             </div>
                         </div>

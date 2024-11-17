@@ -5,8 +5,6 @@ import axios from 'axios';
 const ProductManagement = () => {
   const [products, setProducts] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
-  const [selectedProductImages, setSelectedProductImages] = useState([]);
   const [newProduct, setNewProduct] = useState({
     tenSanPham: '',
     namSanXuat: '',
@@ -29,8 +27,7 @@ const ProductManagement = () => {
       id: ''
     },
     pin: '',
-    trangThai: 1,
-    duongDanHinhAnh: ''
+    trangThai: 1
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -74,16 +71,6 @@ const ProductManagement = () => {
     fetchOptions();
   }, []);
 
-  const handleViewImages = async (productId) => {
-    try {
-      const response = await axios.get(`http://localhost:8080/rest/hinh_anh/getByid/${productId}`);
-      setSelectedProductImages(response.data);
-      setIsImageModalOpen(true);
-    } catch (error) {
-      console.error('Error fetching product images:', error);
-    }
-  };
-
   const handleAddProduct = async () => {
     if (newProduct.tenSanPham) {
       setLoading(true);
@@ -121,8 +108,7 @@ const ProductManagement = () => {
               id: ''
             },
             pin: '',
-            trangThai: 1,
-            duongDanHinhAnh: ''
+            trangThai: 1
           });
           setIsModalOpen(false);
         }
@@ -156,34 +142,19 @@ const ProductManagement = () => {
         <table className="min-w-full bg-white border border-gray-300">
           <thead>
             <tr>
-              <th className="border px-4 py-2">Hình Ảnh</th>
               <th className="border px-4 py-2">Tên Sản Phẩm</th>
               <th className="border px-4 py-2">Năm Sản Xuất</th>
               <th className="border px-4 py-2">Trọng Lượng</th>
               <th className="border px-4 py-2">Loại Sản Phẩm</th>
-              <th className="border px-4 py-2">Thao tác</th>
             </tr>
           </thead>
           <tbody>
             {products.map((product, index) => (
               <tr key={index}>
-                <td className="border px-4 py-2">
-                  {product.duongDanHinhAnh && (
-                    <img src={product.duongDanHinhAnh} alt={product.tenSanPham} className="w-16 h-16 object-cover" />
-                  )}
-                </td>
                 <td className="border px-4 py-2">{product.tenSanPham}</td>
                 <td className="border px-4 py-2">{product.namSanXuat}</td>
                 <td className="border px-4 py-2">{product.trongLuong}</td>
-                <td className="border px-4 py-2">{product.tenLoai}</td>
-                <td className="border px-4 py-2">
-                  <button
-                    onClick={() => handleViewImages(product.id)}
-                    className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
-                  >
-                    Xem ảnh
-                  </button>
-                </td>
+                <td className="border px-4 py-2">{product.loaiSanPham.tenLoai}</td>
               </tr>
             ))}
           </tbody>
@@ -234,13 +205,6 @@ const ProductManagement = () => {
                 onChange={(e) => setNewProduct({ ...newProduct, pin: parseInt(e.target.value) })}
                 className="border p-2 w-full mb-4"
                 placeholder="Dung lượng pin (Wh)"
-              />
-              <input
-                type="text"
-                value={newProduct.duongDanHinhAnh}
-                onChange={(e) => setNewProduct({ ...newProduct, duongDanHinhAnh: e.target.value })}
-                className="border p-2 w-full mb-4"
-                placeholder="Đường dẫn hình ảnh"
               />
               <select
                 value={newProduct.loaiSanPham.id}
@@ -306,32 +270,6 @@ const ProductManagement = () => {
                 <button 
                   onClick={() => setIsModalOpen(false)} 
                   className="ml-2 px-4 py-2 bg-red-500 text-white rounded"
-                >
-                  Đóng
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {isImageModalOpen && (
-          <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-            <div className="bg-white p-6 rounded shadow-lg max-w-4xl w-full">
-              <h2 className="text-lg font-bold mb-4">Hình ảnh sản phẩm</h2>
-              <div className="grid grid-cols-3 gap-4">
-                {selectedProductImages.map((image, index) => (
-                  <img 
-                    key={index}
-                    src={image.duongDan} 
-                    alt={`Product image ${index + 1}`}
-                    className="w-full h-48 object-cover rounded"
-                  />
-                ))}
-              </div>
-              <div className="flex justify-end mt-4">
-                <button 
-                  onClick={() => setIsImageModalOpen(false)}
-                  className="px-4 py-2 bg-red-500 text-white rounded"
                 >
                   Đóng
                 </button>
