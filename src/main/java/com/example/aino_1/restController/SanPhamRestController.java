@@ -3,6 +3,7 @@ package com.example.aino_1.restController;
 import com.example.aino_1.dto.SanPhamDTO;
 import com.example.aino_1.entity.SanPham;
 import com.example.aino_1.repository.SanPhamInterface;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
@@ -24,6 +25,7 @@ import java.net.MalformedURLException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Map;
 
 @CrossOrigin("*") //cho phép tất cả các miền khác truy cập tài nguyên server (end point api)
 @RestController
@@ -31,6 +33,8 @@ import java.util.List;
 public class SanPhamRestController {
     @Autowired
     SanPhamInterface spsi;
+    @Autowired
+
 
     @GetMapping("/getAll")
     public List<SanPham> getAll() {
@@ -48,8 +52,14 @@ public class SanPhamRestController {
     }
 
     @PostMapping("/add")
-    public SanPham create(@RequestBody SanPham sanPham) {
-        return spsi.save(sanPham);
+    public void create(@RequestBody Map<String, Object> requestData) {
+        // Lấy thông tin sản phẩm từ JSON
+        SanPham sanPham = new ObjectMapper().convertValue(requestData.get("sanPham"), SanPham.class);
+
+        // Lấy danh sách URL ảnh từ JSON
+        List<String> imageUrls = (List<String>) requestData.get("imageUrls");
+
+//        spsv.saveSanPhamWithImage(sanPham, imageUrls);
     }
 
     @PutMapping("/update/{id}")

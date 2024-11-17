@@ -5,5 +5,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface LoaiSanPhamInterface extends JpaRepository<LoaiSanPham, String> {
+public interface LoaiSanPhamInterface extends JpaRepository<LoaiSanPham, Integer> {
 }

@@ -38,7 +38,7 @@ public class LoaiSanPhamRestController {
     }
 
     @DeleteMapping("/del/{maLoai}")
-    public void delete(@PathVariable String maLoai) {
+    public void delete(@PathVariable Integer maLoai) {
         lspsi.deleteById(maLoai);
     }
 }

@@ -38,7 +38,7 @@ public class NguonNhapRestController {
     }
 
     @DeleteMapping("/del/{maNhaCungUng}")
-    public void delete(@PathVariable String maNhaCungUng) {
+    public void delete(@PathVariable Integer maNhaCungUng) {
         nnsi.deleteById(maNhaCungUng);
     }
 }
