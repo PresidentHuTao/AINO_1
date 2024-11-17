@@ -3,6 +3,7 @@ package com.example.aino_1.restController;
 import com.example.aino_1.dto.SanPhamDTO;
 import com.example.aino_1.entity.SanPham;
 import com.example.aino_1.repository.SanPhamInterface;
+import com.example.aino_1.service.SanPhamService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
@@ -34,7 +35,7 @@ public class SanPhamRestController {
     @Autowired
     SanPhamInterface spsi;
     @Autowired
-
+    SanPhamService spsv;
 
     @GetMapping("/getAll")
     public List<SanPham> getAll() {
@@ -59,7 +60,7 @@ public class SanPhamRestController {
         // Lấy danh sách URL ảnh từ JSON
         List<String> imageUrls = (List<String>) requestData.get("imageUrls");
 
-//        spsv.saveSanPhamWithImage(sanPham, imageUrls);
+        spsv.saveSanPhamWithImage(sanPham, imageUrls);
     }
 
     @PutMapping("/update/{id}")

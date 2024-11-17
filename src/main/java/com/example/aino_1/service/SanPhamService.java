@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.List;
 
 
 @Service
@@ -28,7 +29,7 @@ public class SanPhamService {
     private HinhAnhInterface hinhAnhInterface; // Repository cho HinhAnh
 
 
-    public SanPham saveSanPhamWithImage(SanPham sp, ArrayList<String> urlImg) {
+    public SanPham saveSanPhamWithImage(SanPham sp, List<String> urlImg) {
         // Bước 1: Lưu sản phẩm mà không có ảnh
         SanPham sanPham = new SanPham();
         sanPham.setTenSanPham(sp.getTenSanPham());
