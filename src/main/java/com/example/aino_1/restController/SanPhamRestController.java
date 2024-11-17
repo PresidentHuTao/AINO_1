@@ -64,8 +64,10 @@ public class SanPhamRestController {
     }
 
     @PutMapping("/update/{id}")
-    public SanPham update(@RequestBody SanPham sanPham) {
-        return spsi.save(sanPham);
+    public void update(@RequestBody Map<String, Object> requestData) {
+        SanPham sanPham = new ObjectMapper().convertValue(requestData.get("sanPham"), SanPham.class);
+        List<String> imageUrls = (List<String>) requestData.get("imageUrls");
+        spsv.updateSanPhamWithImage(sanPham, imageUrls);
     }
 
     @DeleteMapping("/del/{id}")
