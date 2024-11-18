@@ -54,4 +54,9 @@ public class SanPhamChiTiet {
 
     @Column(name = "trang_thai_spct")
     private Integer trangThaiSpct;  // Trạng thái sản phẩm chi tiết
+
+    @ManyToOne
+    @JoinColumn(name = "id_card_do_hoa", referencedColumnName = "id")
+    private CardDoHoa cardDoHoa;
+
 }

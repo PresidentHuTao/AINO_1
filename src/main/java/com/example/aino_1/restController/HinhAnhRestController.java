@@ -56,7 +56,12 @@ public class HinhAnhRestController {
 
     @PostMapping("/addListIMG")
     public void AddlisstIMG(@RequestBody List<HinhAnh> listAdd) {
-       hasv.AddImg(listAdd);
+        hasv.AddImg(listAdd);
     }
 
+    @GetMapping("/getAllById/{id}")
+    public List<HinhAnh> lha( @PathVariable  Integer id) {
+        return hasi.findAllBySanPhamId(id);
+    };
 }
+

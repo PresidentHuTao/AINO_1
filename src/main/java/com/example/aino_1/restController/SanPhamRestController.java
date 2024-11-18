@@ -42,14 +42,14 @@ public class SanPhamRestController {
         return spsi.findAll();
     }
 
-    @GetMapping("/getDTOADMIN")
-    public  List<SanPhamDTO> AdminSanPhamDTO(){
-        return spsi.findProductDetailsWithImageAndCategory();
-    }
+//    @GetMapping("/getDTOADMIN")
+//    public  List<SanPhamDTO> AdminSanPhamDTO(){
+//        return spsi.findProductDetailsWithImageAndCategory();
+//    }
 
     @GetMapping("/getById/{id}")
     public SanPham getById(@PathVariable Integer id) {
-        return spsi.getById(id);
+        return spsi.findById(id).get();
     }
 
     @PostMapping("/add")
@@ -65,8 +65,12 @@ public class SanPhamRestController {
 
     @PutMapping("/update/{id}")
     public void update(@RequestBody Map<String, Object> requestData) {
+        // Lấy thông tin sản phẩm từ JSON
         SanPham sanPham = new ObjectMapper().convertValue(requestData.get("sanPham"), SanPham.class);
+
+        // Lấy danh sách URL ảnh từ JSON
         List<String> imageUrls = (List<String>) requestData.get("imageUrls");
+
         spsv.updateSanPhamWithImage(sanPham, imageUrls);
     }
 

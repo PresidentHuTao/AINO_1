@@ -42,6 +42,7 @@ public class SanPhamService {
         sanPham.setGioiThieu(sp.getGioiThieu());
         sanPham.setThoiHanBaoHanh(sp.getThoiHanBaoHanh());
         sanPham.setPin(sp.getPin());
+        sanPham.setTrangThai(sp.getTrangThai());
 
         // Thiết lập loại sản phẩm
         LoaiSanPham loaiSanPham = loaiSanPhamInterface.findById(sp.getLoaiSanPham().getId()).get();
@@ -77,9 +78,8 @@ public class SanPhamService {
         return savedSanPham;
     }
     @Transactional
-    public SanPham updateSanPhamWithImage(SanPham sp, List<String> urlImg) {
-        // Kiểm tra xem sản phẩm có tồn tại trong cơ sở dữ liệu hay không dựa trên ID
-        SanPham existingSanPham = sanPhamInterface.findById(sp.getId()).orElse(null);
+    public void updateSanPhamWithImage(SanPham sp, List<String> urlImg) {
+//        SanPham existingSanPham = sanPhamInterface.findById(sp.getId()).orElse(null);
 
 //        if (existingSanPham != null) {
 //            // Nếu sản phẩm tồn tại, cập nhật thông tin
@@ -115,25 +115,23 @@ public class SanPhamService {
 //            }
 
             // Lưu thông tin sản phẩm đã cập nhật vào cơ sở dữ liệu
-            SanPham updatedSanPham = sanPhamInterface.save(existingSanPham);
+//            SanPham updatedSanPham = sanPhamInterface.save(existingSanPham);
 
             sanPhamInterface.save(sp);
 
             // Nếu có danh sách URL hình ảnh mới, cập nhật hình ảnh
             if (urlImg != null && !urlImg.isEmpty()) {
                 // Xóa các ảnh cũ liên quan đến sản phẩm này (nếu cần thiết)
-                hinhAnhInterface.deleteBySanPhamId(existingSanPham.getId());
+                hinhAnhInterface.deleteBySanPhamId(sp.getId());
 
                 // Thêm các ảnh mới
                 for (String url : urlImg) {
                     HinhAnh hinhAnh = new HinhAnh();
                     hinhAnh.setDuongDanHinhAnh(url);
-                    hinhAnh.setSanPham(updatedSanPham);
+                    hinhAnh.setSanPham(sp);
                     hinhAnhInterface.save(hinhAnh);
                 }
             }
-
-            return updatedSanPham;
 
         }
     }

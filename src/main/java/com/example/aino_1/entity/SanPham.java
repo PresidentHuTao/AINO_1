@@ -48,9 +48,6 @@ public class SanPham {
     @Column(name = "thoi_han_bao_hanh", length = 20)
     private String thoiHanBaoHanh;
 
-    @ManyToOne
-    @JoinColumn(name = "id_card_do_hoa", referencedColumnName = "id")
-    private CardDoHoa cardDoHoa;
 
     @Column(name = "pin")
     private Integer pin;
