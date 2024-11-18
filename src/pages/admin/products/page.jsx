@@ -1,22 +1,42 @@
+// Import các thư viện cần thiết
 import React, { useState, useEffect } from 'react';
 import NavbarAdmin from '../Navbar/NavbarAdmin';
 import axios from 'axios';
 
+// Component quản lý sản phẩm
 const ProductManagement = () => {
+  // Khai báo state để lưu trữ danh sách sản phẩm
   const [products, setProducts] = useState([]);
+  // State quản lý trạng thái hiển thị modal
   const [isModalOpen, setIsModalOpen] = useState(false);
+  // State quản lý trạng thái hiển thị modal chi tiết
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  // State lưu trữ các hình ảnh được chọn để upload
   const [selectedImages, setSelectedImages] = useState([]);
+  // State lưu trữ các hình ảnh đã tồn tại
   const [existingImages, setExistingImages] = useState([]);
+  // State lưu trữ preview của tất cả hình ảnh
+  const [previewImages, setPreviewImages] = useState([]);
+  // State xác định đang ở chế độ chỉnh sửa hay thêm mới
   const [isEditing, setIsEditing] = useState(false);
+  // State lưu trữ sản phẩm đang được chọn để chỉnh sửa
   const [selectedProduct, setSelectedProduct] = useState(null);
+  // State lưu trữ sản phẩm đang xem chi tiết
+  const [detailProduct, setDetailProduct] = useState(null);
+  // State lưu trữ hình ảnh của sản phẩm đang xem chi tiết
+  const [detailProductImages, setDetailProductImages] = useState([]);
+  // State quản lý việc hiển thị sản phẩm đã xóa
   const [showDeleted, setShowDeleted] = useState(false);
-  const [newProduct, setNewProduct] = useState({
+  // State lưu trữ dữ liệu form
+  const [formData, setFormData] = useState({
     sanPham: {
+      id: '',
       tenSanPham: '',
       namSanXuat: '',
       trongLuong: '',
       gioiThieu: '',
       thoiHanBaoHanh: '',
+      trangThai: 1,
       loaiSanPham: {
         id: ''
       },
@@ -26,26 +46,29 @@ const ProductManagement = () => {
       chatLieu: {
         id: ''
       },
-      cardDoHoa: {
-        id: ''
-      },
       kichThuocLaptop: {
         id: ''
       },
       pin: '',
-      trangThai: 1
     },
     imageUrls: []
   });
+  // State quản lý trạng thái loading
   const [loading, setLoading] = useState(false);
+  // State quản lý thông báo lỗi
   const [error, setError] = useState(null);
+  // State lưu trữ danh sách các loại sản phẩm
   const [loaiSanPhams, setLoaiSanPhams] = useState([]);
+  // State lưu trữ danh sách nguồn nhập
   const [nguonNhaps, setNguonNhaps] = useState([]);
+  // State lưu trữ danh sách chất liệu
   const [chatLieus, setChatLieus] = useState([]);
-  const [cardDoHoas, setCardDoHoas] = useState([]);
+  // State lưu trữ danh sách kích thước laptop
   const [ktlts, setKtlts] = useState([]);
 
+  // useEffect để fetch dữ liệu khi component mount
   useEffect(() => {
+    // Hàm fetch danh sách sản phẩm
     const fetchProducts = async () => {
       try {
         const response = await fetch('http://localhost:8080/rest/san_pham/getAll');
@@ -56,19 +79,18 @@ const ProductManagement = () => {
       }
     };
 
+    // Hàm fetch các options cho form
     const fetchOptions = async () => {
       try {
-        const [loaiRes, nguonRes, chatLieuRes, cardRes, ktltRes] = await Promise.all([
+        const [loaiRes, nguonRes, chatLieuRes, ktltRes] = await Promise.all([
           axios.get('http://localhost:8080/rest/loai_san_pham/getAll'),
           axios.get('http://localhost:8080/rest/nguon_nhap/getAll'),
           axios.get('http://localhost:8080/rest/chat_lieu/getAll'),
-          axios.get('http://localhost:8080/rest/card_do_hoa/getAll'),
           axios.get('http://localhost:8080/rest/ktlt/getAll')
         ]);
         setLoaiSanPhams(loaiRes.data);
         setNguonNhaps(nguonRes.data);
         setChatLieus(chatLieuRes.data);
-        setCardDoHoas(cardRes.data);
         setKtlts(ktltRes.data);
       } catch (error) {
         console.error('Error fetching options:', error);
@@ -79,15 +101,42 @@ const ProductManagement = () => {
     fetchOptions();
   }, []);
 
+  // Xử lý khi click vào sản phẩm để xem chi tiết
+  const handleViewDetail = async (productId) => {
+    try {
+      const [productResponse, imagesResponse] = await Promise.all([
+        axios.get(`http://localhost:8080/rest/san_pham/getById/${productId}`),
+        axios.get(`http://localhost:8080/rest/hinh_anh/getAllById/${productId}`)
+      ]);
+      
+      setDetailProduct(productResponse.data);
+      setDetailProductImages(imagesResponse.data);
+      setIsDetailModalOpen(true);
+    } catch (error) {
+      console.error('Error fetching product details:', error);
+    }
+  };
+
+  // Xử lý khi người dùng chọn hình ảnh
   const handleImageChange = (e) => {
     const files = Array.from(e.target.files);
     setSelectedImages(files);
+    
+    // Thêm hình ảnh mới vào preview
+    const newPreviewImages = files.map(file => ({
+      url: URL.createObjectURL(file),
+      isNew: true,
+      file: file
+    }));
+    setPreviewImages(prev => [...prev, ...newPreviewImages]);
   };
 
-  const removeSelectedImage = (index) => {
-    setSelectedImages(selectedImages.filter((_, i) => i !== index));
+  // Xóa hình ảnh khỏi preview
+  const removeImage = (index) => {
+    setPreviewImages(prev => prev.filter((_, i) => i !== index));
   };
 
+  // Upload hình ảnh lên Cloudinary
   const uploadImages = async () => {
     const uploadedUrls = [];
     
@@ -112,35 +161,68 @@ const ProductManagement = () => {
     return uploadedUrls;
   };
 
-  const handleEditProduct = async (product) => {
-    setSelectedProduct(product);
-    setNewProduct({
-      sanPham: {
-        ...product,
-        loaiSanPham: product.loaiSanPham || { id: '' },
-        nguonNhap: product.nguonNhap || { id: '' },
-        chatLieu: product.chatLieu || { id: '' },
-        cardDoHoa: product.cardDoHoa || { id: '' },
-        kichThuocLaptop: product.kichThuocLaptop || { id: '' }
-      },
-      imageUrls: product.imageUrls || []
-    });
+  // Mở form thêm/sửa sản phẩm
+  const openProductForm = async (product = null) => {
+    if (product) {
+      setSelectedProduct(product);
+      setFormData({
+        sanPham: {
+          ...product,
+          loaiSanPham: product.loaiSanPham || { id: '' },
+          nguonNhap: product.nguonNhap || { id: '' },
+          chatLieu: product.chatLieu || { id: '' },
+          kichThuocLaptop: product.kichThuocLaptop || { id: '' }
+        },
+        imageUrls: product.imageUrls || []
+      });
 
-    try {
-      const response = await axios.get('http://localhost:8080/rest/hinh_anh/getAll');
-      const productImages = response.data.filter(img => img.productId === product.id);
-      setExistingImages(productImages);
-    } catch (error) {
-      console.error('Error fetching product images:', error);
+      try {
+        // Lấy hình ảnh cho sản phẩm cụ thể
+        const response = await axios.get(`http://localhost:8080/rest/hinh_anh/getAllById/${product.id}`);
+        const productImages = response.data.map(img => ({
+          url: img.duongDanHinhAnh,
+          isNew: false
+        }));
+        setExistingImages(productImages);
+        setPreviewImages(productImages);
+      } catch (error) {
+        console.error('Error fetching product images:', error);
+      }
+
+      setIsEditing(true);
+    } else {
+      // Reset form khi thêm mới
+      setSelectedProduct(null);
+      setFormData({
+        sanPham: {
+          tenSanPham: '',
+          namSanXuat: '',
+          trongLuong: '',
+          gioiThieu: '',
+          thoiHanBaoHanh: '',
+          loaiSanPham: { id: '' },
+          nguonNhap: { id: '' },
+          chatLieu: { id: '' },
+          kichThuocLaptop: { id: '' },
+          pin: '',
+          trangThai: 1
+        },
+        imageUrls: []
+      });
+      setIsEditing(false);
+      setExistingImages([]);
+      setPreviewImages([]);
     }
-
-    setIsEditing(true);
     setIsModalOpen(true);
   };
 
-  const handleUpdateProduct = async () => {
-    if (!selectedProduct || !newProduct.sanPham.tenSanPham) {
-      setError('Thông tin sản phẩm không hợp lệ');
+  // Xử lý submit form
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    // Kiểm tra validation
+    if (!formData.sanPham.tenSanPham) {
+      setError('Tên sản phẩm là bắt buộc');
       return;
     }
 
@@ -148,69 +230,70 @@ const ProductManagement = () => {
     setError(null);
 
     try {
-      const updatedProduct = {
-        id: selectedProduct.id,
-        tenSanPham: newProduct.sanPham.tenSanPham,
-        namSanXuat: newProduct.sanPham.namSanXuat,
-        trongLuong: newProduct.sanPham.trongLuong,
-        gioiThieu: newProduct.sanPham.gioiThieu,
-        thoiHanBaoHanh: newProduct.sanPham.thoiHanBaoHanh,
-        pin: newProduct.sanPham.pin,
-        trangThai: newProduct.sanPham.trangThai,
-        loaiSanPham: {
-          id: newProduct.sanPham.loaiSanPham.id
-        },
-        nguonNhap: {
-          id: newProduct.sanPham.nguonNhap.id
-        },
-        chatLieu: {
-          id: newProduct.sanPham.chatLieu.id
-        },
-        kichThuocLaptop: {
-          id: newProduct.sanPham.kichThuocLaptop.id
-        },
-        cardDoHoa: newProduct.sanPham.cardDoHoa.id ? {
-          id: newProduct.sanPham.cardDoHoa.id
-        } : null,
-        imageUrls: existingImages.map(img => img.url)
+      let imageUrls = [];
+      
+      // Upload hình ảnh mới nếu có
+      if (selectedImages.length > 0) {
+        const uploadedUrls = await uploadImages();
+        // Thêm các URL mới vào previewImages
+        const newPreviewImages = uploadedUrls.map(url => ({
+          url: url,
+          isNew: true
+        }));
+        setPreviewImages(prev => [...prev, ...newPreviewImages]);
+        imageUrls = [...uploadedUrls];
+      }
+
+      // Lấy tất cả URL từ previewImages
+      const allImageUrls = previewImages.map(img => img.url);
+
+      const requestData = {
+        sanPham: formData.sanPham,
+        imageUrls: allImageUrls
       };
 
-      const response = await axios.put(
-        `http://localhost:8080/rest/san_pham/update/${selectedProduct.id}`,
-        updatedProduct
-      );
-
-      if (response.status === 200) {
-        const updatedResponse = await fetch('http://localhost:8080/rest/san_pham/getAll');
-        const updatedData = await updatedResponse.json();
-        setProducts(updatedData);
-
-        setNewProduct({
-          sanPham: {
-            tenSanPham: '',
-            namSanXuat: '',
-            trongLuong: '',
-            gioiThieu: '',
-            thoiHanBaoHanh: '',
-            loaiSanPham: { id: '' },
-            nguonNhap: { id: '' },
-            chatLieu: { id: '' },
-            cardDoHoa: { id: '' },
-            kichThuocLaptop: { id: '' },
-            pin: '',
-            trangThai: 1
-          },
-          imageUrls: []
-        });
-        setSelectedImages([]);
-        setExistingImages([]);
-        setIsModalOpen(false);
-        setIsEditing(false);
-        setSelectedProduct(null);
+      // Gọi API tương ứng (update hoặc create)
+      if (isEditing) {
+        await axios.put(
+          `http://localhost:8080/rest/san_pham/update/${selectedProduct.id}`,
+          requestData
+        );
+      } else {
+        await axios.post('http://localhost:8080/rest/san_pham/add', requestData);
       }
+
+      // Refresh danh sách sản phẩm
+      const updatedResponse = await fetch('http://localhost:8080/rest/san_pham/getAll');
+      const updatedData = await updatedResponse.json();
+      setProducts(updatedData);
+
+      // Reset form và đóng modal
+      setFormData({
+        sanPham: {
+          tenSanPham: '',
+          namSanXuat: '',
+          trongLuong: '',
+          gioiThieu: '',
+          thoiHanBaoHanh: '',
+          loaiSanPham: { id: '' },
+          nguonNhap: { id: '' },
+          chatLieu: { id: '' },
+          kichThuocLaptop: { id: '' },
+          pin: '',
+          trangThai: 1
+        },
+        imageUrls: []
+      });
+      setSelectedImages([]);
+      setExistingImages([]);
+      setPreviewImages([]);
+      setIsModalOpen(false);
+      setIsEditing(false);
+      setSelectedProduct(null);
+
     } catch (error) {
-      console.error('Error updating product:', error);
-      setError('Cập nhật sản phẩm thất bại. Vui lòng thử lại.');
+      console.error('Error submitting product:', error);
+      setError(`${isEditing ? 'Cập nhật' : 'Thêm'} sản phẩm thất bại. Vui lòng thử lại.`);
       if (error.response) {
         console.error('Error details:', error.response.data);
       }
@@ -219,60 +302,7 @@ const ProductManagement = () => {
     }
   };
 
-  const handleAddProduct = async () => {
-    if (newProduct.sanPham.tenSanPham) {
-      setLoading(true);
-      setError(null);
-      
-      try {
-        const imageUrls = await uploadImages();
-        
-        const productWithImages = {
-          ...newProduct,
-          imageUrls: imageUrls
-        };
-
-        const response = await axios.post('http://localhost:8080/rest/san_pham/add', productWithImages);
-        
-        if (response.status === 200) {
-          const updatedResponse = await fetch('http://localhost:8080/rest/san_pham/getAll');
-          const updatedData = await updatedResponse.json();
-          setProducts(updatedData);
-          
-          setNewProduct({
-            sanPham: {
-              tenSanPham: '',
-              namSanXuat: '',
-              trongLuong: '',
-              gioiThieu: '',
-              thoiHanBaoHanh: '',
-              loaiSanPham: { id: '' },
-              nguonNhap: { id: '' },
-              chatLieu: { id: '' },
-              cardDoHoa: { id: '' },
-              kichThuocLaptop: { id: '' },
-              pin: '',
-              trangThai: 1
-            },
-            imageUrls: []
-          });
-          setSelectedImages([]);
-          setIsModalOpen(false);
-        }
-      } catch (error) {
-        console.error('Error adding product:', error);
-        setError('Thêm sản phẩm thất bại. Vui lòng thử lại.');
-        if (error.response) {
-          console.error('Error details:', error.response.data);
-        }
-      } finally {
-        setLoading(false);
-      }
-    } else {
-      setError('Tên sản phẩm là bắt buộc');
-    }
-  };
-
+  // Xử lý thay đổi trạng thái sản phẩm (ẩn/hiện)
   const handleToggleStatus = async (product) => {
     try {
       const updatedProduct = {
@@ -282,9 +312,13 @@ const ProductManagement = () => {
 
       await axios.put(
         `http://localhost:8080/rest/san_pham/update/${product.id}`,
-        updatedProduct
+        {
+          sanPham: updatedProduct,
+          imageUrls: existingImages.map(img => img.url)
+        }
       );
 
+      // Refresh danh sách sản phẩm
       const updatedResponse = await fetch('http://localhost:8080/rest/san_pham/getAll');
       const updatedData = await updatedResponse.json();
       setProducts(updatedData);
@@ -293,10 +327,12 @@ const ProductManagement = () => {
     }
   };
 
+  // Lọc sản phẩm theo trạng thái
   const filteredProducts = showDeleted 
     ? products.filter(product => product.trangThai === 0)
     : products.filter(product => product.trangThai === 1);
 
+  // Render giao diện
   return (
     <div className="min-h-screen flex">
       <NavbarAdmin />
@@ -304,11 +340,7 @@ const ProductManagement = () => {
         <h1 className="text-2xl font-bold mb-6">Quản lý sản phẩm</h1>
         <div className="mb-4 flex justify-between">
           <button 
-            onClick={() => {
-              setIsEditing(false);
-              setSelectedProduct(null);
-              setIsModalOpen(true);
-            }} 
+            onClick={() => openProductForm()} 
             className="px-4 py-2 bg-blue-500 text-white rounded"
           >
             Thêm sản phẩm
@@ -333,7 +365,7 @@ const ProductManagement = () => {
           </thead>
           <tbody>
             {filteredProducts.map((product, index) => (
-              <tr key={index}>
+              <tr key={index} onClick={() => handleViewDetail(product.id)} className="cursor-pointer hover:bg-gray-50">
                 <td className="border px-4 py-2">{product.tenSanPham}</td>
                 <td className="border px-4 py-2">{product.namSanXuat}</td>
                 <td className="border px-4 py-2">{product.trongLuong}</td>
@@ -343,13 +375,19 @@ const ProductManagement = () => {
                 </td>
                 <td className="border px-4 py-2">
                   <button
-                    onClick={() => handleEditProduct(product)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      openProductForm(product);
+                    }}
                     className="px-3 py-1 bg-yellow-500 text-white rounded mr-2"
                   >
                     Sửa
                   </button>
                   <button
-                    onClick={() => handleToggleStatus(product)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleToggleStatus(product);
+                    }}
                     className={`px-3 py-1 ${product.trangThai === 1 ? 'bg-red-500' : 'bg-green-500'} text-white rounded`}
                   >
                     {product.trangThai === 1 ? 'Ẩn' : 'Khôi phục'}
@@ -360,139 +398,175 @@ const ProductManagement = () => {
           </tbody>
         </table>
 
+        {/* Modal chi tiết sản phẩm */}
+        {isDetailModalOpen && detailProduct && (
+          <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+            <div className="bg-white p-6 rounded shadow-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+              <h2 className="text-lg font-bold mb-4">Chi tiết sản phẩm</h2>
+              <div className="space-y-4">
+                <p><span className="font-bold">Tên sản phẩm:</span> {detailProduct.tenSanPham}</p>
+                <p><span className="font-bold">Năm sản xuất:</span> {detailProduct.namSanXuat}</p>
+                <p><span className="font-bold">Trọng lượng:</span> {detailProduct.trongLuong} kg</p>
+                <p><span className="font-bold">Giới thiệu:</span> {detailProduct.gioiThieu}</p>
+                <p><span className="font-bold">Thời hạn bảo hành:</span> {detailProduct.thoiHanBaoHanh} tháng</p>
+                <p><span className="font-bold">Pin:</span> {detailProduct.pin} Wh</p>
+                <p><span className="font-bold">Loại sản phẩm:</span> {detailProduct.loaiSanPham?.tenLoai}</p>
+                <p><span className="font-bold">Nguồn nhập:</span> {detailProduct.nguonNhap?.tenNhaCungUng}</p>
+                <p><span className="font-bold">Chất liệu:</span> {detailProduct.chatLieu?.tenChatLieu}</p>
+                <p><span className="font-bold">Kích thước:</span> {detailProduct.kichThuocLaptop?.kichThuoc} inch</p>
+                
+                {/* Hiển thị hình ảnh sản phẩm */}
+                {detailProductImages.length > 0 && (
+                  <div>
+                    <p className="font-bold mb-2">Hình ảnh sản phẩm:</p>
+                    <div className="grid grid-cols-3 gap-4">
+                      {detailProductImages.map((image, index) => (
+                        <img
+                          key={index}
+                          src={image.duongDanHinhAnh}
+                          alt={`Sản phẩm ${index + 1}`}
+                          className="w-full h-40 object-cover rounded"
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+              <div className="mt-4 flex justify-end">
+                <button 
+                  onClick={() => setIsDetailModalOpen(false)}
+                  className="px-4 py-2 bg-gray-500 text-white rounded"
+                >
+                  Đóng
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Modal thêm/sửa sản phẩm */}
         {isModalOpen && (
           <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
             <div className="bg-white p-6 rounded shadow-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
               <h2 className="text-lg font-bold mb-4">
                 {isEditing ? 'Cập nhật sản phẩm' : 'Thêm sản phẩm mới'}
               </h2>
-              <input 
-                type="text" 
-                value={newProduct.sanPham.tenSanPham} 
-                onChange={(e) => setNewProduct({ 
-                  ...newProduct, 
-                  sanPham: { ...newProduct.sanPham, tenSanPham: e.target.value }
-                })} 
-                className="border p-2 w-full mb-4"
-                placeholder="Tên sản phẩm"
-              />
-              <input 
-                type="number" 
-                value={newProduct.sanPham.namSanXuat} 
-                onChange={(e) => setNewProduct({ 
-                  ...newProduct, 
-                  sanPham: { ...newProduct.sanPham, namSanXuat: parseInt(e.target.value) }
-                })} 
-                className="border p-2 w-full mb-4"
-                placeholder="Năm sản xuất"
-              />
-              <input 
-                type="number" 
-                value={newProduct.sanPham.trongLuong} 
-                onChange={(e) => setNewProduct({ 
-                  ...newProduct, 
-                  sanPham: { ...newProduct.sanPham, trongLuong: parseFloat(e.target.value) }
-                })} 
-                className="border p-2 w-full mb-4"
-                placeholder="Trọng lượng (kg)"
-              />
-              <textarea
-                value={newProduct.sanPham.gioiThieu}
-                onChange={(e) => setNewProduct({ 
-                  ...newProduct, 
-                  sanPham: { ...newProduct.sanPham, gioiThieu: e.target.value }
-                })}
-                className="border p-2 w-full mb-4"
-                placeholder="Giới thiệu"
-                rows="3"
-              />
-              <input 
-                type="text"
-                value={newProduct.sanPham.thoiHanBaoHanh}
-                onChange={(e) => setNewProduct({ 
-                  ...newProduct, 
-                  sanPham: { ...newProduct.sanPham, thoiHanBaoHanh: e.target.value }
-                })}
-                className="border p-2 w-full mb-4"
-                placeholder="Thời hạn bảo hành"
-              />
-              <input 
-                type="number"
-                value={newProduct.sanPham.pin}
-                onChange={(e) => setNewProduct({ 
-                  ...newProduct, 
-                  sanPham: { ...newProduct.sanPham, pin: parseInt(e.target.value) }
-                })}
-                className="border p-2 w-full mb-4"
-                placeholder="Dung lượng pin (Wh)"
-              />
-              <select
-                value={newProduct.sanPham.loaiSanPham.id}
-                onChange={(e) => setNewProduct({ 
-                  ...newProduct, 
-                  sanPham: { ...newProduct.sanPham, loaiSanPham: { id: e.target.value } }
-                })}
-                className="border p-2 w-full mb-4"
-              >
-                <option value="">Chọn loại sản phẩm</option>
-                {loaiSanPhams.map((loai) => (
-                  <option key={loai.id} value={loai.id}>{loai.tenLoai}</option>
-                ))}
-              </select>
-              <select
-                value={newProduct.sanPham.nguonNhap.id}
-                onChange={(e) => setNewProduct({ 
-                  ...newProduct, 
-                  sanPham: { ...newProduct.sanPham, nguonNhap: { id: e.target.value } }
-                })}
-                className="border p-2 w-full mb-4"
-              >
-                <option value="">Chọn nguồn nhập</option>
-                {nguonNhaps.map((nguon) => (
-                  <option key={nguon.id} value={nguon.id}>{nguon.tenNhaCungUng}</option>
-                ))}
-              </select>
-              <select
-                value={newProduct.sanPham.chatLieu.id}
-                onChange={(e) => setNewProduct({ 
-                  ...newProduct, 
-                  sanPham: { ...newProduct.sanPham, chatLieu: { id: e.target.value } }
-                })}
-                className="border p-2 w-full mb-4"
-              >
-                <option value="">Chọn chất liệu</option>
-                {chatLieus.map((chatLieu) => (
-                  <option key={chatLieu.id} value={chatLieu.id}>{chatLieu.tenChatLieu}</option>
-                ))}
-              </select>
-              <select
-                value={newProduct.sanPham.cardDoHoa.id}
-                onChange={(e) => setNewProduct({ 
-                  ...newProduct, 
-                  sanPham: { ...newProduct.sanPham, cardDoHoa: { id: e.target.value } }
-                })}
-                className="border p-2 w-full mb-4"
-              >
-                <option value="">Chọn card đồ họa</option>
-                {cardDoHoas.map((card) => (
-                  <option key={card.id} value={card.id}>{card.tenCard}</option>
-                ))}
-              </select>
-              <select
-                value={newProduct.sanPham.kichThuocLaptop.id}
-                onChange={(e) => setNewProduct({ 
-                  ...newProduct, 
-                  sanPham: { ...newProduct.sanPham, kichThuocLaptop: { id: e.target.value } }
-                })}
-                className="border p-2 w-full mb-4"
-              >
-                <option value="">Chọn kích thước laptop</option>
-                {ktlts.map((ktlt) => (
-                  <option key={ktlt.id} value={ktlt.id}>{ktlt.kichThuoc} inch</option>
-                ))}
-              </select>
+              <form onSubmit={handleSubmit}>
+                {/* Form fields */}
+                <input 
+                  type="text" 
+                  value={formData.sanPham.tenSanPham} 
+                  onChange={(e) => setFormData({ 
+                    ...formData, 
+                    sanPham: { ...formData.sanPham, tenSanPham: e.target.value }
+                  })} 
+                  className="border p-2 w-full mb-4"
+                  placeholder="Tên sản phẩm"
+                />
+                <input 
+                  type="number" 
+                  value={formData.sanPham.namSanXuat} 
+                  onChange={(e) => setFormData({ 
+                    ...formData, 
+                    sanPham: { ...formData.sanPham, namSanXuat: parseInt(e.target.value) }
+                  })} 
+                  className="border p-2 w-full mb-4"
+                  placeholder="Năm sản xuất"
+                />
+                <input 
+                  type="number" 
+                  value={formData.sanPham.trongLuong} 
+                  onChange={(e) => setFormData({ 
+                    ...formData, 
+                    sanPham: { ...formData.sanPham, trongLuong: parseFloat(e.target.value) }
+                  })} 
+                  className="border p-2 w-full mb-4"
+                  placeholder="Trọng lượng (kg)"
+                />
+                <textarea
+                  value={formData.sanPham.gioiThieu}
+                  onChange={(e) => setFormData({ 
+                    ...formData, 
+                    sanPham: { ...formData.sanPham, gioiThieu: e.target.value }
+                  })}
+                  className="border p-2 w-full mb-4"
+                  placeholder="Giới thiệu"
+                  rows="3"
+                />
+                <input 
+                  type="text"
+                  value={formData.sanPham.thoiHanBaoHanh}
+                  onChange={(e) => setFormData({ 
+                    ...formData, 
+                    sanPham: { ...formData.sanPham, thoiHanBaoHanh: e.target.value }
+                  })}
+                  className="border p-2 w-full mb-4"
+                  placeholder="Thời hạn bảo hành"
+                />
+                <input 
+                  type="number"
+                  value={formData.sanPham.pin}
+                  onChange={(e) => setFormData({ 
+                    ...formData, 
+                    sanPham: { ...formData.sanPham, pin: parseInt(e.target.value) }
+                  })}
+                  className="border p-2 w-full mb-4"
+                  placeholder="Dung lượng pin (Wh)"
+                />
+                <select
+                  value={formData.sanPham.loaiSanPham.id}
+                  onChange={(e) => setFormData({ 
+                    ...formData, 
+                    sanPham: { ...formData.sanPham, loaiSanPham: { id: e.target.value } }
+                  })}
+                  className="border p-2 w-full mb-4"
+                >
+                  <option value="">Chọn loại sản phẩm</option>
+                  {loaiSanPhams.map((loai) => (
+                    <option key={loai.id} value={loai.id}>{loai.tenLoai}</option>
+                  ))}
+                </select>
+                <select
+                  value={formData.sanPham.nguonNhap.id}
+                  onChange={(e) => setFormData({ 
+                    ...formData, 
+                    sanPham: { ...formData.sanPham, nguonNhap: { id: e.target.value } }
+                  })}
+                  className="border p-2 w-full mb-4"
+                >
+                  <option value="">Chọn nguồn nhập</option>
+                  {nguonNhaps.map((nguon) => (
+                    <option key={nguon.id} value={nguon.id}>{nguon.tenNhaCungUng}</option>
+                  ))}
+                </select>
+                <select
+                  value={formData.sanPham.chatLieu.id}
+                  onChange={(e) => setFormData({ 
+                    ...formData, 
+                    sanPham: { ...formData.sanPham, chatLieu: { id: e.target.value } }
+                  })}
+                  className="border p-2 w-full mb-4"
+                >
+                  <option value="">Chọn chất liệu</option>
+                  {chatLieus.map((chatLieu) => (
+                    <option key={chatLieu.id} value={chatLieu.id}>{chatLieu.tenChatLieu}</option>
+                  ))}
+                </select>
+                <select
+                  value={formData.sanPham.kichThuocLaptop.id}
+                  onChange={(e) => setFormData({ 
+                    ...formData, 
+                    sanPham: { ...formData.sanPham, kichThuocLaptop: { id: e.target.value } }
+                  })}
+                  className="border p-2 w-full mb-4"
+                >
+                  <option value="">Chọn kích thước laptop</option>
+                  {ktlts.map((ktlt) => (
+                    <option key={ktlt.id} value={ktlt.id}>{ktlt.kichThuoc} inch</option>
+                  ))}
+                </select>
 
-              {!isEditing && (
+                {/* Input file để upload hình ảnh */}
                 <input
                   type="file"
                   multiple
@@ -500,71 +574,59 @@ const ProductManagement = () => {
                   className="border p-2 w-full mb-4"
                   accept="image/*"
                 />
-              )}
 
-              {!isEditing && selectedImages.length > 0 && (
-                <div className="mb-4">
-                  <p>Hình ảnh đã chọn:</p>
-                  <div className="flex flex-wrap gap-2">
-                    {selectedImages.map((image, index) => (
-                      <div key={index} className="w-20 h-20 relative">
-                        <img
-                          src={URL.createObjectURL(image)}
-                          alt={`Preview ${index + 1}`}
-                          className="w-full h-full object-cover"
-                        />
-                        <button
-                          onClick={() => removeSelectedImage(index)}
-                          className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs"
-                        >
-                          ×
-                        </button>
-                      </div>
-                    ))}
+                {/* Hiển thị preview hình ảnh */}
+                {previewImages.length > 0 && (
+                  <div className="mb-4">
+                    <p>Tất cả hình ảnh:</p>
+                    <div className="flex flex-wrap gap-2">
+                      {previewImages.map((image, index) => (
+                        <div key={index} className="w-20 h-20 relative">
+                          <img
+                            src={image.url}
+                            alt={`Preview ${index + 1}`}
+                            className="w-full h-full object-cover"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => removeImage(index)}
+                            className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs"
+                          >
+                            ×
+                          </button>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
 
-              {isEditing && existingImages.length > 0 && (
-                <div className="mb-4">
-                  <p>Hình ảnh hiện tại:</p>
-                  <div className="flex flex-wrap gap-2">
-                    {existingImages.map((image, index) => (
-                      <div key={index} className="w-20 h-20">
-                        <img
-                          src={image.url}
-                          alt={`Existing ${index + 1}`}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                    ))}
-                  </div>
+                {/* Hiển thị thông báo lỗi nếu có */}
+                {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
+                <div className="flex justify-end">
+                  <button 
+                    type="submit"
+                    disabled={loading}
+                    className={`px-4 py-2 rounded ${
+                      loading ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-500'
+                    } text-white`}
+                  >
+                    {loading ? 'Đang tải...' : isEditing ? 'Cập nhật' : 'Thêm'}
+                  </button>
+                  <button 
+                    type="button"
+                    onClick={() => {
+                      setIsModalOpen(false);
+                      setIsEditing(false);
+                      setSelectedProduct(null);
+                      setExistingImages([]);
+                      setPreviewImages([]);
+                    }} 
+                    className="ml-2 px-4 py-2 bg-red-500 text-white rounded"
+                  >
+                    Đóng
+                  </button>
                 </div>
-              )}
-
-              {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
-              <div className="flex justify-end">
-                <button 
-                  onClick={isEditing ? handleUpdateProduct : handleAddProduct}
-                  disabled={loading}
-                  className={`px-4 py-2 rounded ${
-                    loading ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-500'
-                  } text-white`}
-                >
-                  {loading ? 'Đang tải...' : isEditing ? 'Cập nhật' : 'Thêm'}
-                </button>
-                <button 
-                  onClick={() => {
-                    setIsModalOpen(false);
-                    setIsEditing(false);
-                    setSelectedProduct(null);
-                    setExistingImages([]);
-                  }} 
-                  className="ml-2 px-4 py-2 bg-red-500 text-white rounded"
-                >
-                  Đóng
-                </button>
-              </div>
+              </form>
             </div>
           </div>
         )}
