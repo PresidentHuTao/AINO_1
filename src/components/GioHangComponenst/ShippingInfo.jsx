@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 function ShippingInfo({
   provinces,
@@ -13,8 +13,63 @@ function ShippingInfo({
   setSelectedWard,
   setSpecificAddress,
   errors,
-  setErrors
+  setErrors,
+  setShippingFee
 }) {
+  const calculateShippingFee = async () => {
+    if (!selectedProvince || !selectedDistrict || !specificAddress) {
+      return;
+    }
+
+    try {
+      const selectedProvinceName = provinces.find(
+        p => p.code === parseInt(selectedProvince)
+      )?.name;
+      
+      const selectedDistrictName = districts.find(
+        d => d.code === parseInt(selectedDistrict)
+      )?.name;
+
+      const requestData = {
+        pick_province: "Hà Nội",
+        pick_district: "Cầu Giấy",
+        province: selectedProvinceName,
+        district: selectedDistrictName,
+        address: specificAddress,
+        weight: 1000,
+        value: 500000,
+        transport: "road"
+      };
+
+      const response = await fetch('http://localhost:8080/api/ghtk/calculate-fee', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestData)
+      });
+
+      const data = await response.json();
+      console.log('GHTK response:', data);
+
+      if (data && data.fee) {
+        setShippingFee(data.fee);
+        localStorage.setItem('shippingFee', data.fee.toString());
+      } else {
+        setShippingFee(0);
+        localStorage.setItem('shippingFee', '0');
+      }
+    } catch (error) {
+      console.error('Lỗi tính phí vận chuyển:', error);
+      setShippingFee(0);
+      localStorage.setItem('shippingFee', '0');
+    }
+  };
+
+  useEffect(() => {
+    calculateShippingFee();
+  }, [selectedProvince, selectedDistrict, specificAddress]);
+
   return (
     <>
       <div className="mb-4">

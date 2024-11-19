@@ -1,6 +1,5 @@
 import React from 'react';
-
-function OrderSummary({ cartItems, quantities, totalAmount, errors, loading, handleCheckout }) {
+function OrderSummary({ cartItems, quantities, totalAmount, shippingFee, errors, loading, handleCheckout }) {
   return (
     <div className="bg-white rounded-lg shadow-md p-6 mb-6">
       <h2 className="text-xl font-semibold mb-4">Thông tin đơn hàng</h2>
@@ -67,17 +66,25 @@ function OrderSummary({ cartItems, quantities, totalAmount, errors, loading, han
         <div className="flex justify-between items-center border-b py-4">
           <span className="text-lg font-semibold">Phí vận chuyển:</span>
           <span className="text-xl font-bold text-gray-600">
-            Miễn phí
+            {shippingFee && !isNaN(shippingFee) ? 
+              Number(shippingFee).toLocaleString("vi-VN", {
+                style: "currency",
+                currency: "VND",
+              }) 
+              : 'Miễn phí'
+            }
           </span>
         </div>
 
         <div className="flex justify-between items-center pt-4">
           <span className="text-xl font-bold">Tổng cộng:</span>
           <span className="text-2xl font-bold text-red-600">
-            {totalAmount.toLocaleString("vi-VN", {
-              style: "currency",
-              currency: "VND",
-            })}
+            {(totalAmount + (shippingFee && !isNaN(shippingFee) ? Number(shippingFee) : 0))
+              .toLocaleString("vi-VN", {
+                style: "currency", 
+                currency: "VND",
+              })
+            }
           </span>
         </div>
       </div>

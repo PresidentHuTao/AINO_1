@@ -30,10 +30,11 @@ function CheckoutPage() {
   const [selectedStore, setSelectedStore] = useState(""); // New state for selected store
   const [pickupDate, setPickupDate] = useState(""); // New state for pickup date
   const [paymentMethod, setPaymentMethod] = useState("cod"); // New state for payment method
+  const [shippingFee, setShippingFee] = useState(0);
 
   useEffect(() => {
-    const checkoutItems =
-      JSON.parse(localStorage.getItem("checkoutItems")) || [];
+    const checkoutItems = JSON.parse(localStorage.getItem("checkoutItems")) || [];
+    const savedShippingFee = localStorage.getItem('shippingFee') || '0';
     const initialQuantities = {};
     let initialTotalAmount = 0;
 
@@ -45,6 +46,7 @@ function CheckoutPage() {
     setCartItems(checkoutItems);
     setQuantities(initialQuantities);
     setTotalAmount(initialTotalAmount);
+    setShippingFee(parseFloat(savedShippingFee));
   }, []);
 
   useEffect(() => {
@@ -199,6 +201,36 @@ function CheckoutPage() {
     return Object.keys(newErrors).length === 0;
   };
 
+  const calculateShippingFee = async (addressData) => {
+    try {
+      const requestData = {
+        pick_province: "Hà Nội",
+        pick_district: "Cầu Giấy",
+        province: addressData.province,
+        district: addressData.district,
+        address: addressData.address,
+        weight: 1000, // Default weight in grams
+        value: totalAmount,
+        transport: "road"
+      };
+
+      const response = await fetch('http://localhost:8080/api/ghtk/calculate-fee', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestData)
+      });
+
+      const data = await response.json();
+      if (data.fee) {
+        setShippingFee(data.fee);
+      }
+    } catch (error) {
+      console.error('Error calculating shipping fee:', error);
+    }
+  };
+
   const handleCheckout = async (shippingFee) => {
     setLoading(true);
     try {
@@ -314,6 +346,8 @@ function CheckoutPage() {
                   setSpecificAddress={setSpecificAddress}
                   errors={errors}
                   setErrors={setErrors}
+                  totalAmount={totalAmount}
+                  setShippingFee={setShippingFee}
                 />
               )}
 
@@ -332,9 +366,10 @@ function CheckoutPage() {
               cartItems={cartItems}
               quantities={quantities}
               totalAmount={totalAmount}
+              shippingFee={deliveryMethod === "shipping" ? shippingFee : 0}
               errors={errors}
               loading={loading}
-              handleCheckout={handleCheckout}
+              handleCheckout={(e) => handleCheckout(shippingFee)}
             />
           </div>
         </div>
