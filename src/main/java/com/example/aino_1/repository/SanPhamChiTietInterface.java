@@ -19,13 +19,14 @@ public interface SanPhamChiTietInterface extends JpaRepository<SanPhamChiTiet, I
                     "spct.id, spct.soLuong, sp.tenSanPham, cl.tenChatLieu, sp.gioiThieu, " +
                     "ram.dungLuong, olt.dungLuong, mh.doPhanGiai, ktlt.kichThuoc, " +
                     "mh.tamNen, mh.tanSoQuet, cpu.soNhan, gpu.kienTrucCongNghe, " +
-                    "cpu.ten, spct.maSpct, ha.duongDanHinhAnh, spct.donGia, sp.id, gpu.ten,sp.trongLuong" +
+                    "cpu.ten, spct.maSpct, " +
+                    "(SELECT MIN(ha.duongDanHinhAnh) FROM HinhAnh ha WHERE ha.sanPham.id = sp.id), " +
+                    "spct.donGia, sp.id, gpu.ten, sp.trongLuong" +
                     ") " +
                     "FROM SanPhamChiTiet spct " +
                     "JOIN SanPham sp ON spct.sanPham.id = sp.id " +
                     "INNER JOIN ChatLieu cl ON cl.id = sp.chatLieu.id " +
                     "INNER JOIN LoaiSanPham lsp ON lsp.id = sp.loaiSanPham.id " +
-                    "INNER JOIN HinhAnh ha ON ha.sanPham.id = sp.id " +
                     "INNER JOIN KichThuocLapTop ktlt ON ktlt.id = sp.kichThuocLaptop.id " +
                     "INNER JOIN NguonNhap nn ON nn.id = sp.nguonNhap.id " +
                     "INNER JOIN ManHinh mh ON mh.id = spct.manHinh.id " +
@@ -38,18 +39,20 @@ public interface SanPhamChiTietInterface extends JpaRepository<SanPhamChiTiet, I
 
 
 
+
     @Query(
             "SELECT DISTINCT new com.example.aino_1.dto.SanPhamChiTietDto(" +
                     "spct.id, spct.soLuong, sp.tenSanPham, cl.tenChatLieu, sp.gioiThieu, " +
                     "ram.dungLuong, olt.dungLuong, mh.doPhanGiai, ktlt.kichThuoc, " +
                     "mh.tamNen, mh.tanSoQuet, cpu.soNhan, gpu.kienTrucCongNghe, " +
-                    "cpu.ten, spct.maSpct, ha.duongDanHinhAnh, spct.donGia,sp.id,gpu.ten,sp.trongLuong" +
+                    "cpu.ten, spct.maSpct, " +
+                    "(SELECT ha.duongDanHinhAnh FROM HinhAnh ha WHERE ha.sanPham.id = sp.id ORDER BY ha.id ASC LIMIT 1), " +
+                    "spct.donGia, sp.id, gpu.ten, sp.trongLuong" +
                     ") " +
                     "FROM SanPhamChiTiet spct " +
                     "JOIN SanPham sp ON spct.sanPham.id = sp.id " +
                     "INNER JOIN ChatLieu cl ON cl.id = sp.chatLieu.id " +
                     "INNER JOIN LoaiSanPham lsp ON lsp.id = sp.loaiSanPham.id " +
-                    "INNER JOIN HinhAnh ha ON ha.sanPham.id = sp.id " +
                     "INNER JOIN KichThuocLapTop ktlt ON ktlt.id = sp.kichThuocLaptop.id " +
                     "INNER JOIN NguonNhap nn ON nn.id = sp.nguonNhap.id " +
                     "INNER JOIN ManHinh mh ON mh.id = spct.manHinh.id " +
@@ -60,6 +63,7 @@ public interface SanPhamChiTietInterface extends JpaRepository<SanPhamChiTiet, I
                     "WHERE spct.id = :id"
     )
     SanPhamChiTietDto getSanPhamChiTietById(@Param("id") Integer id);
+
 
     @Query("SELECT ha.duongDanHinhAnh FROM SanPhamChiTiet spct " +
             "JOIN SanPham sp on spct.sanPham.id = sp.id JOIN HinhAnh ha on ha.sanPham.id = sp.id  where spct.id = :id")

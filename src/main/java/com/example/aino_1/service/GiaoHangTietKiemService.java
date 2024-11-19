@@ -58,7 +58,6 @@ public class GiaoHangTietKiemService {
     public Map<String, Object> calculateShippingFee(Map<String, Object> feeRequest) {
         String url = baseUrl + "/services/shipment/fee";
 
-        // Headers
         HttpHeaders headers = new HttpHeaders();
         headers.set("Token", apiToken);
         headers.set("Content-Type", "application/json");
