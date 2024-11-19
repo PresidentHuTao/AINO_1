@@ -223,8 +223,10 @@ function CheckoutPage() {
       });
 
       const data = await response.json();
-      if (data.fee) {
-        setShippingFee(data.fee);
+      console.log(data);
+      if (data) {
+        setShippingFee(data.fee.fee);
+        console.log(data.fee.fee);
       }
     } catch (error) {
       console.error('Error calculating shipping fee:', error);

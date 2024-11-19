@@ -71,7 +71,7 @@ function OrderSummary({ cartItems, quantities, totalAmount, shippingFee, errors,
                 style: "currency",
                 currency: "VND",
               }) 
-              : 'Miễn phí'
+              : ''
             }
           </span>
         </div>

@@ -1,46 +1,54 @@
+// Import các thư viện React cần thiết
 import React, { useEffect, useState } from 'react';
 
+// Component ShippingInfo nhận vào các props để xử lý thông tin giao hàng
 function ShippingInfo({
-  provinces,
-  districts,
-  wards,
-  selectedProvince,
-  selectedDistrict,
-  selectedWard,
-  specificAddress,
-  handleProvinceChange,
-  handleDistrictChange,
-  setSelectedWard,
-  setSpecificAddress,
-  errors,
-  setErrors,
-  setShippingFee
+  provinces, // Danh sách tỉnh/thành phố
+  districts, // Danh sách quận/huyện
+  wards, // Danh sách phường/xã
+  selectedProvince, // Tỉnh/thành phố được chọn
+  selectedDistrict, // Quận/huyện được chọn  
+  selectedWard, // Phường/xã được chọn
+  specificAddress, // Địa chỉ cụ thể
+  handleProvinceChange, // Hàm xử lý khi thay đổi tỉnh/thành phố
+  handleDistrictChange, // Hàm xử lý khi thay đổi quận/huyện
+  setSelectedWard, // Hàm cập nhật phường/xã được chọn
+  setSpecificAddress, // Hàm cập nhật địa chỉ cụ thể
+  errors, // Object chứa các lỗi
+  setErrors, // Hàm cập nhật lỗi
+  setShippingFee // Hàm cập nhật phí vận chuyển
 }) {
+  // Hàm tính phí vận chuyển
   const calculateShippingFee = async () => {
-    if (!selectedProvince || !selectedDistrict || !specificAddress) {
+    // Kiểm tra điều kiện trước khi tính phí
+    if (!selectedProvince || !selectedDistrict) {
       return;
     }
 
     try {
+      // Lấy tên tỉnh/thành phố từ mã code
       const selectedProvinceName = provinces.find(
         p => p.code === parseInt(selectedProvince)
       )?.name;
       
+      // Lấy tên quận/huyện từ mã code
       const selectedDistrictName = districts.find(
         d => d.code === parseInt(selectedDistrict)
       )?.name;
 
+      // Chuẩn bị dữ liệu gửi lên API
       const requestData = {
-        pick_province: "Hà Nội",
-        pick_district: "Cầu Giấy",
-        province: selectedProvinceName,
-        district: selectedDistrictName,
-        address: specificAddress,
-        weight: 1000,
-        value: 500000,
-        transport: "road"
+        pick_province: "Hà Nội", // Tỉnh/thành phố lấy hàng
+        pick_district: "Cầu Giấy", // Quận/huyện lấy hàng
+        province: selectedProvinceName, // Tỉnh/thành phố giao hàng
+        district: selectedDistrictName, // Quận/huyện giao hàng
+        address: specificAddress || "", // Địa chỉ giao hàng (có thể trống)
+        weight: 1000, // Khối lượng (gram)
+        value: 500000, // Giá trị đơn hàng
+        transport: "road" // Phương thức vận chuyển
       };
 
+      // Gọi API tính phí vận chuyển
       const response = await fetch('http://localhost:8080/api/ghtk/calculate-fee', {
         method: 'POST',
         headers: {
@@ -49,29 +57,38 @@ function ShippingInfo({
         body: JSON.stringify(requestData)
       });
 
+      // Xử lý kết quả từ API
       const data = await response.json();
       console.log('GHTK response:', data);
 
+      // Nếu có phí vận chuyển thì cập nhật state và localStorage
       if (data && data.fee) {
-        setShippingFee(data.fee);
-        localStorage.setItem('shippingFee', data.fee.toString());
+        setShippingFee(data.fee.fee);
+        console.log(data.fee.fee);
+        localStorage.setItem('shippingFee', data.fee.fee.toString());
       } else {
         setShippingFee(0);
         localStorage.setItem('shippingFee', '0');
       }
     } catch (error) {
+      // Xử lý lỗi khi gọi API
       console.error('Lỗi tính phí vận chuyển:', error);
       setShippingFee(0);
       localStorage.setItem('shippingFee', '0');
     }
   };
 
+  // Gọi hàm tính phí vận chuyển khi chọn quận/huyện
   useEffect(() => {
-    calculateShippingFee();
-  }, [selectedProvince, selectedDistrict, specificAddress]);
+    if (selectedDistrict) {
+      calculateShippingFee();
+    }
+  }, [selectedDistrict]);
 
+  // Render giao diện component
   return (
     <>
+      {/* Phần chọn tỉnh/thành phố */}
       <div className="mb-4">
         <label htmlFor="province" className="block text-lg font-semibold mb-2">
           Chọn tỉnh thành:
@@ -94,6 +111,7 @@ function ShippingInfo({
         )}
       </div>
 
+      {/* Phần chọn quận/huyện */}
       <div className="mb-4">
         <label htmlFor="district" className="block text-lg font-semibold mb-2">
           Chọn quận huyện:
@@ -117,6 +135,7 @@ function ShippingInfo({
         )}
       </div>
 
+      {/* Phần chọn phường/xã */}
       <div className="mb-4">
         <label htmlFor="ward" className="block text-lg font-semibold mb-2">
           Chọn phường xã:
@@ -143,6 +162,7 @@ function ShippingInfo({
         )}
       </div>
 
+      {/* Phần nhập địa chỉ cụ thể */}
       <div className="mb-4">
         <label htmlFor="specificAddress" className="block text-lg font-semibold mb-2">
           Nhập địa chỉ số nhà cụ thể:
@@ -167,4 +187,5 @@ function ShippingInfo({
   );
 }
 
+// Export component để sử dụng ở nơi khác
 export default ShippingInfo;
