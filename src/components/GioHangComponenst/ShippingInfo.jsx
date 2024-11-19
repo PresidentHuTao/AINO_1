@@ -16,8 +16,13 @@ function ShippingInfo({
   setSpecificAddress, // Hàm cập nhật địa chỉ cụ thể
   errors, // Object chứa các lỗi
   setErrors, // Hàm cập nhật lỗi
-  setShippingFee // Hàm cập nhật phí vận chuyển
+  setShippingFee, // Hàm cập nhật phí vận chuyển
+  cartItems, // Danh sách sản phẩm trong giỏ hàng
+  quantities, // Số lượng sản phẩm,
+  totalAmount, // Tổng tiền đơn hàng
+  weight, // Trọng lượng đơn hàng
 }) {
+
   // Hàm tính phí vận chuyển
   const calculateShippingFee = async () => {
     // Kiểm tra điều kiện trước khi tính phí
@@ -36,6 +41,9 @@ function ShippingInfo({
         d => d.code === parseInt(selectedDistrict)
       )?.name;
 
+      // // Tính tổng trọng lượng
+      // const weight = calculateTotalWeight(); // Tính trọng lượng
+
       // Chuẩn bị dữ liệu gửi lên API
       const requestData = {
         pick_province: "Hà Nội", // Tỉnh/thành phố lấy hàng
@@ -43,8 +51,8 @@ function ShippingInfo({
         province: selectedProvinceName, // Tỉnh/thành phố giao hàng
         district: selectedDistrictName, // Quận/huyện giao hàng
         address: specificAddress || "", // Địa chỉ giao hàng (có thể trống)
-        weight: 1000, // Khối lượng (gram)
-        value: 500000, // Giá trị đơn hàng
+        weight: weight, // Khối lượng (gram) được tính toán
+        value: totalAmount, // Giá trị đơn hàng
         transport: "road" // Phương thức vận chuyển
       };
 
